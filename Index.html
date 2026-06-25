@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 기사 에셋 액션 서바이벌 게임</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #111;
+            color: #fff;
+            font-family: 'Malgun Gothic', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        h1 {
+            margin: 5px 0;
+            font-size: 24px;
+            text-shadow: 0 0 10px #00f0ff;
+            color: #00f0ff;
+        }
+        #gameContainer {
+            position: relative;
+            border: 4px solid #333;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+            border-radius: 8px;
+            background: #222;
+        }
+        canvas {
+            display: block;
+            background: radial-gradient(circle, #2a2a2a 0%, #1a1a1a 100%);
+        }
+        #uiOverlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: bold;
+            pointer-events: none;
+            text-shadow: 2px 2px 2px #000;
+        }
+        .ui-element {
+            background: rgba(0,0,0,0.6);
+            padding: 5px 12px;
+            border-radius: 4px;
+            border: 1px solid #444;
+        }
+        #hpBarContainer {
+            width: 150px;
+            height: 20px;
+            background: #444;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #fff;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        #hpBar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff3333, #ff6666);
+            transition: width 0.1s ease;
+        }
+        #startScreen, #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 4px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #00f0ff, #0077ff);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 25px;
+            margin-top: 20px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.8);
+        }
+        #gameOverScreen {
+            display: none;
+        }
+        .instructions {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #aaa;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .highlight {
+            color: #ffe600;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>KNIGHT ASSAULT: 3D SPRITE SURVIVOR</h1>
+    
+    <div id="gameContainer">
+        <!-- UI Overlay -->
+        <div id="uiOverlay">
+            <div class="ui-element">
+                HP: <div id="hpBarContainer"><div id="hpBar"></div></div>
+            </div>
+            <div class="ui-element" id="scoreDisplay">SCORE: 0</div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="startScreen">
+            <h2 style="color: #ffe600; font-size: 28px; margin-bottom: 10px;">기사단 자산 팩 데모 게임</h2>
+            <p style="text-align:center; max-width: 400px; color: #ddd; font-size: 14px;">
+                제공해주신 <span class="highlight">3D Knight 에셋 이미지(knight.png)</span>를 실시간 연동하여 잘라 쓰는 탑다운 액션 생존 게임입니다.
+            </p>
+            <div class="instructions">
+                <strong>[조작 방법]</strong><br>
+                이동: <span class="highlight">W, A, S, D</span> 또는 방향키<br>
+                공격 (검 휘두르기): <span class="highlight">마우스 클릭</span> (마우스 방향 조준)<br>
+                방어 (방패 막기): <span class="highlight">Space바</span> (받는 피해 80% 감소)
+            </div>
+            <button class="btn" onclick="startGame()">게임 시작</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen">
+            <h2 style="color: #ff3333; font-size: 32px; margin-bottom: 10px;">MISSION FAILED</h2>
+            <p id="finalScore" style="font-size: 20px; margin-bottom: 20px;">최종 점수: 0</p>
+            <button class="btn" onclick="restartGame()">다시 도전</button>
+        </div>
+
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+    </div>
+
+    <p style="font-size: 12px; color: #666; margin-top: 10px;">
+        * knight.png 파일이 index.html과 같은 폴더에 있어야 이미지가 정상 출력됩니다.
+    </p>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // UI elements
+        const hpBar = document.getElementById('hpBar');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScoreText = document.getElementById('finalScore');
+
+        // [이미지 파일 연동] 파일 이름을 knight.png로 설정
+        const knightImg = new Image();
+        knightImg.src = 'knight.png';
+
+        // Game State
+        let gameActive = false;
+        let score = 0;
+        let keys = {};
+        let mouseX = 0;
+        let mouseY = 0;
+        let isDefending = false;
+
+        // Entities
+        let player;
+        let enemies = [];
+        let particles = [];
+        let attackEffect = null;
+        let spawnTimer = 0;
+        let spawnInterval = 90; // frames
+
+        // Event Listeners
+        window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if(e.key === ' ') isDefending = true; });
+        window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; if(e.key === ' ') isDefending = false; });
+        
+        canvas.addEventListener('mousemove', e => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        canvas.addEventListener('mousedown', e => {
+            if (!gameActive) return;
+            if (isDefending) return; // 방어 중 공격 불가
+            player.attack();
+        });
+
+        class Player {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 18;
+                this.speed = 4;
+                this.maxHp = 100;
+                this.hp = 100;
+                this.angle = 0;
+                this.isAttacking = false;
+                this.attackCooldown = 0;
+                this.state = 'idle'; // idle, run, attack, shield
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+
+                // 그림자 효과
+                ctx.beginPath();
+                ctx.arc(0, 10, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fill();
+
+                // --- 에셋 시트 슬라이싱 가이드 ---
+                // 이미지 팩 내부에서 상황에 맞는 기사 모션을 잘라옵니다.
+                // 올려주신 그리드 크기를 대략 1920x1080 기준으로 가상 매핑했습니다.
+                let sx = 0;  // 자를 이미지의 시작 X 좌표
+                let sy = 0;  // 자를 이미지의 시작 Y 좌표
+                let sw = 150; // 원본에서 자를 가로 크기
+                let sh = 180; // 원본에서 자를 세로 크기
+
+                if (this.state === 'shield') {
+                    // 방패 가드 모션 (A4, R1 근처 슬라이싱 좌표 예시)
+                    sx = 1350; sy = 250;
+                } else if (this.state === 'attack') {
+                    // 검 휘두르는 격투 모션 (A2, A3 근처 슬라이싱 좌표 예시)
+                    sx = 420; sy = 750;
+                } else if (this.state === 'run') {
+                    // 뛰는 역동적인 모션 (하단 러닝 루프 좌표 예시)
+                    sx = 1550; sy = 750;
+                } else {
+                    // 기본 대기 모션 / 정면 포즈 (가장 왼쪽 기본 기사 좌표 예시)
+                    sx = 50; sy = 200;
+                }
+
+                // knight.png 이미지가 로드되었을 때 렌더링
+                if (knightImg.complete) {
+                    // 스프라이트 시트가 탑다운 기준으로 기본 배치될 때의 보정 각도를 맞추기 위해 -90도 회전 상태로 렌더링
+                    ctx.rotate(-Math.PI / 2);
+                    
+                    // 정중앙 정렬을 위해 절반 크기만큼 마이너스 오프셋 적용
+                    ctx.drawImage(knightImg, sx, sy, sw, sh, -25, -30, 50, 60);
+                } else {
+                    // 이미지 로딩 실패 시 대체할 임시 원형 도형 기사
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#9eafb8';
+                    ctx.fill();
+                }
+
+                ctx.restore();
+
+                // 무기 이펙트 장식 (인게임 판정 시각화)
+                if (!isDefending && this.isAttacking) {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    ctx.beginPath();
+                    ctx.moveTo(this.radius, -5);
+                    ctx.lineTo(this.radius + 15, -25);
+                    ctx.strokeStyle = '#00f0ff';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
+            update() {
+                let moveX = 0;
+                let moveY = 0;
+
+                if (keys['w'] || keys['arrowup']) moveY -= 1;
+                if (keys['s'] || keys['arrowdown']) moveY += 1;
+                if (keys['a'] || keys['arrowleft']) moveX -= 1;
+                if (keys['d'] || keys['arrowright']) moveX += 1;
+
+                if (moveX !== 0 && moveY !== 0) {
+                    moveX *= 0.7071;
+                    moveY *= 0.7071;
+                }
+
+                this.x += moveX * this.speed;
+                this.y += moveY * this.speed;
+
+                this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
+                this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
+
+                // 상태 머신 업데이트 -> 이미지 슬라이싱 위치를 결정함
+                if (isDefending) this.state = 'shield';
+                else if (this.isAttacking) this.state = 'attack';
+                else if (moveX !== 0 || moveY !== 0) this.state = 'run';
+                else this.state = 'idle';
+
+                let dx = mouseX - this.x;
+                let dy = mouseY - this.y;
+                this.angle = Math.atan2(dy, dx) + Math.PI / 2;
+
+                if (this.attackCooldown > 0) {
+                    this.attackCooldown--;
+                } else {
+                    this.isAttacking = false;
+                }
+            }
+
+            attack() {
+                if (this.attackCooldown === 0) {
+                    this.isAttacking = true;
+                    this.attackCooldown = 18;
+
+                    attackEffect = {
+                        x: this.x,
+                        y: this.y,
+                        angle: this.angle - Math.PI / 2,
+                        radius: 50,
+                        life: 10
+                    };
+
+                    enemies.forEach((enemy) => {
+                        let edx = enemy.x - this.x;
+                        let edy = enemy.y - this.y;
+                        let dist = Math.hypot(edx, edy);
+
+                        if (dist < 60) {
+                            let enemyAngle = Math.atan2(edy, edx);
+                            let angleDiff = Math.abs(enemyAngle - attackEffect.angle);
+                            if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
+
+                            if (angleDiff < Math.PI / 2.5) {
+                                enemy.takeDamage(35);
+                            }
+                        }
+                    });
+                }
+            }
+
+            takeDamage(amount) {
+                if (isDefending) {
+                    amount = amount * 0.2;
+                    createParticles(this.x, this.y, '#ffe600', 4);
+                } else {
+                    createParticles(this.x, this.y, '#ff3333', 6);
+                }
+                this.hp -= amount;
+                if (this.hp <= 0) {
+                    this.hp = 0;
+                    endGame();
+                }
+                hpBar.style.width = `${(this.hp / this.maxHp) * 100}%`;
+            }
+        }
+
+        class Enemy {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.radius = 14;
+                this.type = type;
+                
+                if (type === 'fast') {
+                    this.speed = 2.6;
+                    this.hp = 20;
+                    this.color = '#d966ff';
+                    this.scoreValue = 20;
+                } else if (type === 'tank') {
+                    this.speed = 1.2;
+                    this.hp = 80;
+                    this.radius = 22;
+                    this.color = '#bd3a3a';
+                    this.scoreValue = 50;
+                } else {
+                    this.speed = 1.8;
+                    this.hp = 30;
+                    this.color = '#52a352';
+                    this.scoreValue = 10;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y + 3, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.strokeStyle = '#222';
+                ctx.lineWidth = 2;
+                ctx.fill();
+                ctx.stroke();
+
+                let dx = player.x - this.x;
+                let dy = player.y - this.y;
+                let angle = Math.atan2(dy, dx);
+                
+                ctx.translate(this.x, this.y);
+                ctx.rotate(angle);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(this.radius/2, -5, 3, 3);
+                ctx.fillRect(this.radius/2, 2, 3, 3);
+                ctx.restore();
+            }
+
+            update() {
+                let dx = player.x - this.x;
+                let dy = player.y - this.y;
+                let dist = Math.hypot(dx, dy);
+
+                if (dist > 5) {
+                    this.x += (dx / dist) * this.speed;
+                    this.y += (dy / dist) * this.speed;
+                }
+
+                if (dist < this.radius + player.radius) {
+                    let dmg = this.type === 'tank' ? 0.8 : 0.4;
+                    player.takeDamage(dmg);
+                }
+            }
+
+            takeDamage(amount) {
+                this.hp -= amount;
+                createParticles(this.x, this.y, this.color, 5);
+                
+                let dx = this.x - player.x;
+                let dy = this.y - player.y;
+                let dist = Math.hypot(dx, dy);
+                this.x += (dx / dist) * 15;
+                this.y += (dy / dist) * 15;
+
+                if (this.hp <= 0) {
+                    score += this.scoreValue;
+                    scoreDisplay.innerText = `SCORE: ${score}`;
+                    enemies = enemies.filter(e => e !== this);
+                }
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.vx = (Math.random() - 0.5) * 6;
+                this.vy = (Math.random() - 0.5) * 6;
+                this.radius = Math.random() * 3 + 2;
+                this.alpha = 1;
+                this.life = 20 + Math.random() * 10;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= 1 / this.life;
+            }
+        }
+
+        function createParticles(x, y, color, count) {
+            for(let i=0; i<count; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function spawnEnemy() {
+            if (!gameActive) return;
+            
+            let x, y;
+            if (Math.random() < 0.5) {
+                x = Math.random() < 0.5 ? -30 : canvas.width + 30;
+                y = Math.random() * canvas.height;
+            } else {
+                x = Math.random() * canvas.width;
+                y = Math.random() < 0.5 ? -30 : canvas.height + 30;
+            }
+
+            let rand = Math.random();
+            let type = 'normal';
+            if (score > 150 && rand < 0.25) type = 'fast';
+            else if (score > 300 && rand > 0.8) type = 'tank';
+            else if (score > 600 && rand < 0.5) type = Math.random() > 0.5 ? 'fast' : 'tank';
+
+            enemies.push(new Enemy(x, y, type));
+        }
+
+        function drawAttackSwipe() {
+            if (!attackEffect || attackEffect.life <= 0) return;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(attackEffect.x, attackEffect.y, attackEffect.radius, attackEffect.angle - Math.PI / 3, attackEffect.angle + Math.PI / 3);
+            ctx.strokeStyle = `rgba(0, 240, 255, ${attackEffect.life / 10})`;
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            ctx.restore();
+
+            attackEffect.life--;
+        }
+
+        function startGame() {
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            
+            player = new Player(canvas.width / 2, canvas.height / 2);
+            enemies = [];
+            particles = [];
+            score = 0;
+            scoreDisplay.innerText = `SCORE: ${score}`;
+            player.hp = player.maxHp;
+            hpBar.style.width = '100%';
+            
+            gameActive = true;
+            spawnTimer = 0;
+            spawnInterval = 90;
+            
+            for(let i=0; i<3; i++) spawnEnemy();
+        }
+
+        function endGame() {
+            gameActive = false;
+            gameOverScreen.style.display = 'flex';
+            finalScoreText.innerText = `최종 점수: ${score} 점`;
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = '#2b2b2b';
+            ctx.lineWidth = 1;
+            const gridSize = 40;
+            for(let x=0; x<canvas.width; x+=gridSize) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            }
+            for(let y=0; y<canvas.height; y+=gridSize) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+
+            if (gameActive) {
+                spawnTimer++;
+                let currentInterval = Math.max(25, spawnInterval - Math.floor(score / 20));
+                if (spawnTimer >= currentInterval) {
+                    spawnEnemy();
+                    spawnTimer = 0;
+                }
+
+                player.update();
+                enemies.forEach(enemy => enemy.update());
+                particles.forEach(p => p.update());
+                particles = particles.filter(p => p.alpha > 0);
+            }
+
+            enemies.forEach(enemy => enemy.draw());
+            if (player && player.hp > 0) player.draw();
+            drawAttackSwipe();
+            particles.forEach(p => p.draw());
+
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+    </script>
+</body>
+</html>
