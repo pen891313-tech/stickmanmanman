@@ -3,589 +3,551 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D 기사 에셋 액션 서바이벌 게임</title>
+    <title>픽셀 격투 게임 - 최종본</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #111;
+            background-color: #222;
             color: #fff;
-            font-family: 'Malgun Gothic', sans-serif;
+            font-family: 'Courier New', Courier, monospace;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            align-items: center;
+            height: 100vh;
             overflow: hidden;
-        }
-        h1 {
-            margin: 5px 0;
-            font-size: 24px;
-            text-shadow: 0 0 10px #00f0ff;
-            color: #00f0ff;
+            user-select: none;
         }
         #gameContainer {
             position: relative;
-            border: 4px solid #333;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
-            border-radius: 8px;
-            background: #222;
+            width: 800px;
+            height: 500px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
         }
         canvas {
+            background-color: #333;
+            border: 4px solid #555;
             display: block;
-            background: radial-gradient(circle, #2a2a2a 0%, #1a1a1a 100%);
         }
-        #uiOverlay {
+        /* UI 오버레이 스타일 */
+        .overlay {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 18px;
-            font-weight: bold;
-            pointer-events: none;
-            text-shadow: 2px 2px 2px #000;
-        }
-        .ui-element {
-            background: rgba(0,0,0,0.6);
-            padding: 5px 12px;
-            border-radius: 4px;
-            border: 1px solid #444;
-        }
-        #hpBarContainer {
-            width: 150px;
-            height: 20px;
-            background: #444;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid #fff;
-            display: inline-block;
-            vertical-align: middle;
-            margin-left: 5px;
-        }
-        #hpBar {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #ff3333, #ff6666);
-            transition: width 0.1s ease;
-        }
-        #startScreen, #gameOverScreen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            top: 0; left: 0; width: 800px; height: 500px;
+            background: rgba(20, 20, 20, 0.9);
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-            z-index: 10;
-            border-radius: 4px;
+            align-items: center;
+            box-sizing: border-box;
         }
-        .btn {
-            background: linear-gradient(135deg, #00f0ff, #0077ff);
-            border: none;
-            color: white;
-            padding: 12px 30px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 25px;
-            margin-top: 20px;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
-            transition: transform 0.2s, box-shadow 0.2s;
+        .hidden { display: none !important; }
+        h1 { font-size: 40px; margin-bottom: 20px; color: #ffcc00; text-shadow: 2px 2px #000; }
+        .menu-btn {
+            background: #555; color: #fff; border: 2px solid #fff;
+            padding: 10px 20px; margin: 10px; font-size: 20px; cursor: pointer;
+            width: 200px; text-align: center;
         }
-        .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.8);
+        .menu-btn:hover { background: #ffcc00; color: #000; }
+        
+        /* 캐릭터 선택 창 */
+        .char-container { display: flex; gap: 15px; margin-bottom: 30px; }
+        .char-box {
+            width: 110px; height: 130px; background: #444; border: 3px solid #888;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer; font-weight: bold; font-size: 14px;
         }
-        #gameOverScreen {
-            display: none;
-        }
-        .instructions {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #aaa;
-            text-align: center;
-            line-height: 1.6;
-        }
-        .highlight {
-            color: #ffe600;
-            font-weight: bold;
-        }
+        .char-box.selected-p1 { border-color: #ff4d4d; background: #622; }
+        .char-box.selected-p2 { border-color: #4d4dff; background: #226; }
+        .char-box.selected-both { border-color: #cc4dff; background: #424; }
+        .char-thumb { width: 60px; height: 60px; background: #666; margin-bottom: 10px; border: 1px solid #777; }
     </style>
 </head>
 <body>
 
-    <h1>KNIGHT ASSAULT: 3D SPRITE SURVIVOR</h1>
-    
-    <div id="gameContainer">
-        <div id="uiOverlay">
-            <div class="ui-element">
-                HP: <div id="hpBarContainer"><div id="hpBar"></div></div>
-            </div>
-            <div class="ui-element" id="scoreDisplay">SCORE: 0</div>
-        </div>
-
-        <div id="startScreen">
-            <h2 style="color: #ffe600; font-size: 28px; margin-bottom: 10px;">기사단 에셋 팩 연동 버전</h2>
-            <p style="text-align:center; max-width: 450px; color: #ddd; font-size: 14px;">
-                보내주신 <span class="highlight">knight.png (1408x768)</span> 이미지의 해상도와 우측 검은색 에셋 그리드 좌표를 100% 정밀 분석하여 연동한 버전입니다. 캐릭터가 잘리지 않고 선명하게 출력됩니다!
-            </p>
-            <div class="instructions">
-                <strong>[조작 방법]</strong><br>
-                이동: <span class="highlight">W, A, S, D</span> 또는 방향키<br>
-                공격 (검 휘두르기): <span class="highlight">마우스 클릭</span> (마우스 방향 조준)<br>
-                방어 (방패 막기): <span class="highlight">Space바</span> (받는 피해 80% 감소)
-            </div>
-            <button class="btn" onclick="startGame()">게임 시작</button>
-        </div>
-
-        <div id="gameOverScreen">
-            <h2 style="color: #ff3333; font-size: 32px; margin-bottom: 10px;">MISSION FAILED</h2>
-            <p id="finalScore" style="font-size: 20px; margin-bottom: 20px;">최종 점수: 0</p>
-            <button class="btn" onclick="restartGame()">다시 도전</button>
-        </div>
-
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
+<div id="gameContainer">
+    <div id="mainMenu" class="overlay">
+        <h1>PIXEL FIGHTER</h1>
+        <div class="menu-btn" onclick="selectMode(1)">1 PLAYER (vs AI)</div>
+        <div class="menu-btn" onclick="selectMode(2)">2 PLAYERS</div>
     </div>
 
-    <p style="font-size: 12px; color: #666; margin-top: 10px;">
-        * 이미지 규격 분석 완료 (1408x768). 에셋 그리드 패널을 정확히 슬라이싱합니다.
-    </p>
+    <div id="charSelect" class="overlay hidden">
+        <h1 id="selectTitle">PLAYER 1 선택하세요</h1>
+        <div class="char-container">
+            <div class="char-box" data-id="0" onclick="chooseCharacter(0)">
+                <div class="char-thumb" style="background: url('1-1.jpg') no-repeat center/cover, #ff4d4d"></div>교복 남학생
+            </div>
+            <div class="char-box" data-id="1" onclick="chooseCharacter(1)">
+                <div class="char-thumb" style="background: url('2-1.jpg') no-repeat center/cover, #4d4dff"></div>제복 장교
+            </div>
+            <div class="char-box" data-id="2" onclick="chooseCharacter(2)">
+                <div class="char-thumb" style="background: url('3-1.jpg') no-repeat center/cover, #4dff4d"></div>그림자 소년
+            </div>
+            <div class="char-box" data-id="3" onclick="chooseCharacter(3)">
+                <div class="char-thumb" style="background: url('4-1.jpg') no-repeat center/cover, #ffff4d"></div>교복 여학생
+            </div>
+        </div>
+        <div id="controlInfo" style="text-align: center; color: #aaa; font-size: 14px; line-height: 1.5;"></div>
+    </div>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+</div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+// 게임 상태 관리
+let gameState = "MENU"; 
+let gameMode = 1;      
+let p1SelectedChar = null;
+let p2SelectedChar = null;
+let selectingPlayer = 1;
+
+// 캐릭터 데이터 정의 - 깃허브 이미지 및 프레임 맵 정보 통합
+// ※ 깃허브 절대경로(https://raw.githubusercontent.com/...)로 완전히 바꾸셔도 됩니다.
+const charactersData = [
+    // --- 1번 캐릭터: 학생A (1-1.jpg) ---
+    { 
+        name: "학생A", color: "#ff4d4d", 
+        // 로컬 경로 또는 깃허브 절대경로
+        spriteSrc: "1-1.jpg",
+        // 동작별 Y축(행) 번호 매핑 (0부터 시작)
+        frameMap: { "IDLE": 0, "WALK": 1, "JUMP": 2, "GUARD": 3, "DASH": 4, "ATTACK": 5, "SKILL": 6, "HIT": 7 },
+        // 동작별 실제 프레임 개수 정의
+        framesPerAction: { "IDLE": 8, "WALK": 8, "JUMP": 8, "GUARD": 8, "DASH": 3, "ATTACK": 8, "SKILL": 8, "HIT": 8 }
+    },
+    // --- 2번 캐릭터: 장교 (2-1.jpg) ---
+    { 
+        name: "장교", color: "#4d4dff", 
+        spriteSrc: "2-1.jpg",
+        frameMap: { "IDLE": 0, "WALK": 1, "JUMP": 2, "GUARD": 3, "DASH": 4, "ATTACK": 5, "SKILL": 6, "HIT": 7 },
+        framesPerAction: { "IDLE": 8, "WALK": 8, "JUMP": 8, "GUARD": 8, "DASH": 3, "ATTACK": 8, "SKILL": 8, "HIT": 8 }
+    },
+    // --- 3번 캐릭터: SHADOW (3-1.jpg) ---
+    { 
+        name: "SHADOW", color: "#4dff4d", 
+        spriteSrc: "3-1.jpg",
+        frameMap: { "IDLE": 0, "WALK": 1, "JUMP": 2, "GUARD": 3, "DASH": 4, "ATTACK": 5, "SKILL": 6, "HIT": 7 },
+        // 3번 캐릭터는 모두 8프레임 루프
+        framesPerAction: { "IDLE": 8, "WALK": 8, "JUMP": 8, "GUARD": 8, "DASH": 8, "ATTACK": 8, "SKILL": 8, "HIT": 8 }
+    },
+    // --- 4번 캐릭터: 학생F (4-1.jpg) ---
+    { 
+        name: "학생F", color: "#ffff4d", 
+        spriteSrc: "4-1.jpg",
+        frameMap: { "IDLE": 0, "WALK": 1, "JUMP": 2, "GUARD": 3, "DASH": 4, "ATTACK": 5, "SKILL": 6, "HIT": 7 },
+        // 4번 캐릭터는 모두 8프레임 루프
+        framesPerAction: { "IDLE": 8, "WALK": 8, "JUMP": 8, "GUARD": 8, "DASH": 8, "ATTACK": 8, "SKILL": 8, "HIT": 8 }
+    }
+];
+
+// 조작키 매핑
+const keys = {
+    KeyA: false, KeyD: false, KeyW: false, KeyS: false, 
+    KeyF: false, KeyG: false, KeyH: false,             
+    ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false,
+    Numpad1: false, Numpad2: false, Numpad3: false
+};
+
+// 플레이어 클래스 - 스프라이트 자동 계산 로직 적용
+class Fighter {
+    constructor(x, y, color, isPlayer2, charData) {
+        this.x = x;
+        this.y = y;
+        this.baseY = y;
+        // 캐릭터 렌더링 크기 (픽셀 아트 비율에 맞춤)
+        this.width = 90;   
+        this.height = 130; 
+        this.color = color;
+        this.isP2 = isPlayer2;
+        this.name = charData.name;
+
+        // 스탯
+        this.hp = 100; this.maxHp = 100;
+        this.mp = 0; this.maxMp = 100;
+
+        // 물리/이동 변수
+        this.vx = 0; this.vy = 0;
+        this.speed = 4;
+        this.gravity = 0.6;
+        this.isGrounded = true;
+
+        // 상태 변수
+        this.state = "IDLE";
+        this.direction = isPlayer2 ? -1 : 1; 
         
-        const hpBar = document.getElementById('hpBar');
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const startScreen = document.getElementById('startScreen');
-        const gameOverScreen = document.getElementById('gameOverScreen');
-        const finalScoreText = document.getElementById('finalScore');
+        this.stateTimer = 0;
+        this.dashCooldown = 0;
 
-        // 이미지 파일 연동 (knight.png)
-        const knightImg = new Image();
-        knightImg.src = 'knight.png';
-
-        let gameActive = false;
-        let score = 0;
-        let keys = {};
-        let mouseX = 0;
-        let mouseY = 0;
-        let isDefending = false;
-
-        let player;
-        let enemies = [];
-        let particles = [];
-        let attackEffect = null;
-        let spawnTimer = 0;
-        let spawnInterval = 90;
-
-        window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if(e.key === ' ') isDefending = true; });
-        window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; if(e.key === ' ') isDefending = false; });
+        // --- 스프라이트 시트 제어 ---
+        this.spriteImage = new Image(); 
+        if(charData.spriteSrc) this.spriteImage.src = charData.spriteSrc;
         
-        canvas.addEventListener('mousemove', e => {
-            const rect = canvas.getBoundingClientRect();
-            mouseX = e.clientX - rect.left;
-            mouseY = e.clientY - rect.top;
-        });
+        // 데이터에서 프레임 정보 가져오기
+        this.frameMap = charData.frameMap;
+        this.framesPerAction = charData.framesPerAction;
 
-        canvas.addEventListener('mousedown', e => {
-            if (!gameActive) return;
-            if (isDefending) return;
-            player.attack();
-        });
+        this.currentFrame = 0;
+        this.frameCounter = 0;
+        this.animSpeed = 8; // 애니메이션 속도 (낮을수록 빠름)
+    }
 
-        class Player {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.radius = 20;
-                this.speed = 4;
-                this.maxHp = 100;
-                this.hp = 100;
-                this.angle = 0;
-                this.isAttacking = false;
-                this.attackCooldown = 0;
-                this.state = 'idle';
-            }
+    update(opponent) {
+        // 기력 자연 회복
+        if (this.mp < this.maxMp && this.state !== "SKILL") {
+            this.mp = Math.min(this.maxMp, this.mp + 0.017 * 60); 
+        }
 
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                
-                // 마우스 방향에 맞춰 부드럽게 회전하되, 이미지 스프라이트가 기본적으로 아래쪽을 바라보고 있으므로 각도 보정(-Math.PI/2) 진행
-                ctx.rotate(this.angle - Math.PI / 2);
+        if (this.dashCooldown > 0) this.dashCooldown--;
 
-                // 그림자 효과
-                ctx.beginPath();
-                ctx.arc(0, 0, this.radius * 1.2, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-                ctx.fill();
+        this.vy += this.gravity;
+        this.y += this.vy;
 
-                // 1408x768 원본 이미지에서 에셋 격자 칸의 완벽한 픽셀 좌표 분석값 매핑
-                // 우측 검은색 박스 시작점: X=517, Y=134
-                // 각 칸의 가로 폭 간격: 약 178px, 세로 높이 간격: 약 143px
-                // 상단 타이틀 바 여백을 고려한 Y 시작 보정
-                
-                let sx = 523; 
-                let sy = 205; 
-                let sw = 165; 
-                let sh = 135; 
+        if (this.y >= this.baseY) {
+            this.y = this.baseY;
+            this.vy = 0;
+            this.isGrounded = true;
+        }
 
-                if (this.state === 'shield') {
-                    // 방패 가드 자세 (4행 4열: A4 방패 방어 포즈)
-                    sx = 523 + (178 * 3);
-                    sy = 205 + (141 * 3);
-                } else if (this.state === 'attack') {
-                    // 공격 칼 휘두르기 자세 (4행 2열 또는 3열: A2 공격 포즈)
-                    sx = 523 + (178 * 1);
-                    sy = 205 + (141 * 3);
-                } else if (this.state === 'run') {
-                    // 달리기 자세 (4행 1열: R1 전력 질주 포즈)
-                    sx = 523 + (178 * 0);
-                    sy = 205 + (141 * 3);
-                } else {
-                    // 기본 대기 자세 (1행 1열: 기본 정면 포즈)
-                    sx = 523 + (178 * 0);
-                    sy = 205 + (141 * 0);
-                }
-
-                if (knightImg.complete) {
-                    // 캐릭터 크기에 맞춰서 비율 유지하며 드로우
-                    ctx.drawImage(knightImg, sx, sy, sw, sh, -32, -32, 64, 64);
-                } else {
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = '#9eafb8';
-                    ctx.fill();
-                }
-
-                ctx.restore();
-
-                // 공격 범위 인게임 가이드 라인
-                if (!isDefending && this.isAttacking) {
-                    ctx.save();
-                    ctx.translate(this.x, this.y);
-                    ctx.rotate(this.angle);
-                    ctx.beginPath();
-                    ctx.moveTo(0, -this.radius);
-                    ctx.lineTo(0, -this.radius - 20);
-                    ctx.strokeStyle = 'rgba(0, 240, 255, 0.8)';
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
-                    ctx.restore();
-                }
-            }
-
-            update() {
-                let moveX = 0;
-                let moveY = 0;
-
-                if (keys['w'] || keys['arrowup']) moveY -= 1;
-                if (keys['s'] || keys['arrowdown']) moveY += 1;
-                if (keys['a'] || keys['arrowleft']) moveX -= 1;
-                if (keys['d'] || keys['arrowright']) moveX += 1;
-
-                if (moveX !== 0 && moveY !== 0) {
-                    moveX *= 0.7071;
-                    moveY *= 0.7071;
-                }
-
-                this.x += moveX * this.speed;
-                this.y += moveY * this.speed;
-
-                this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
-                this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
-
-                if (isDefending) this.state = 'shield';
-                else if (this.isAttacking) this.state = 'attack';
-                else if (moveX !== 0 || moveY !== 0) this.state = 'run';
-                else this.state = 'idle';
-
-                let dx = mouseX - this.x;
-                let dy = mouseY - this.y;
-                this.angle = Math.atan2(dy, dx) + Math.PI / 2;
-
-                if (this.attackCooldown > 0) {
-                    this.attackCooldown--;
-                } else {
-                    this.isAttacking = false;
-                }
-            }
-
-            attack() {
-                if (this.attackCooldown === 0) {
-                    this.isAttacking = true;
-                    this.attackCooldown = 18;
-
-                    attackEffect = {
-                        x: this.x,
-                        y: this.y,
-                        angle: this.angle - Math.PI / 2,
-                        radius: 55,
-                        life: 10
-                    };
-
-                    enemies.forEach((enemy) => {
-                        let edx = enemy.x - this.x;
-                        let edy = enemy.y - this.y;
-                        let dist = Math.hypot(edx, edy);
-
-                        if (dist < 65) {
-                            let enemyAngle = Math.atan2(edy, edx);
-                            let angleDiff = Math.abs(enemyAngle - attackEffect.angle);
-                            if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
-
-                            if (angleDiff < Math.PI / 2.2) {
-                                enemy.takeDamage(35);
-                            }
-                        }
-                    });
-                }
-            }
-
-            takeDamage(amount) {
-                if (isDefending) {
-                    amount = amount * 0.2;
-                    createParticles(this.x, this.y, '#ffe600', 4);
-                } else {
-                    createParticles(this.x, this.y, '#ff3333', 6);
-                }
-                this.hp -= amount;
-                if (this.hp <= 0) {
-                    this.hp = 0;
-                    endGame();
-                }
-                hpBar.style.width = `${(this.hp / this.maxHp) * 100}%`;
+        if (this.stateTimer > 0) {
+            this.stateTimer--;
+            if (this.stateTimer === 0) {
+                this.state = "IDLE";
             }
         }
 
-        class Enemy {
-            constructor(x, y, type) {
-                this.x = x;
-                this.y = y;
-                this.radius = 14;
-                this.type = type;
-                
-                if (type === 'fast') {
-                    this.speed = 2.6;
-                    this.hp = 20;
-                    this.color = '#d966ff';
-                    this.scoreValue = 20;
-                } else if (type === 'tank') {
-                    this.speed = 1.2;
-                    this.hp = 80;
-                    this.radius = 22;
-                    this.color = '#bd3a3a';
-                    this.scoreValue = 50;
-                } else {
-                    this.speed = 1.8;
-                    this.hp = 30;
-                    this.color = '#52a352';
-                    this.scoreValue = 10;
-                }
-            }
+        this.x += this.vx;
+        this.vx *= 0.8;
 
-            draw() {
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(this.x, this.y + 3, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0,0,0,0.2)';
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.strokeStyle = '#222';
-                ctx.lineWidth = 2;
-                ctx.fill();
-                ctx.stroke();
-
-                let dx = player.x - this.x;
-                let dy = player.y - this.y;
-                let angle = Math.atan2(dy, dx);
-                
-                ctx.translate(this.x, this.y);
-                ctx.rotate(angle);
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(this.radius/2, -5, 3, 3);
-                ctx.fillRect(this.radius/2, 2, 3, 3);
-                ctx.restore();
-            }
-
-            update() {
-                let dx = player.x - this.x;
-                let dy = player.y - this.y;
-                let dist = Math.hypot(dx, dy);
-
-                if (dist > 5) {
-                    this.x += (dx / dist) * this.speed;
-                    this.y += (dy / dist) * this.speed;
-                }
-
-                if (dist < this.radius + player.radius) {
-                    let dmg = this.type === 'tank' ? 0.8 : 0.4;
-                    player.takeDamage(dmg);
-                }
-            }
-
-            takeDamage(amount) {
-                this.hp -= amount;
-                createParticles(this.x, this.y, this.color, 5);
-                
-                let dx = this.x - player.x;
-                let dy = this.y - player.y;
-                let dist = Math.hypot(dx, dy);
-                this.x += (dx / dist) * 15;
-                this.y += (dy / dist) * 15;
-
-                if (this.hp <= 0) {
-                    score += this.scoreValue;
-                    scoreDisplay.innerText = `SCORE: ${score}`;
-                    enemies = enemies.filter(e => e !== this);
-                }
-            }
+        if (this.state === "IDLE" || this.state === "WALK" || this.state === "JUMP") {
+            this.direction = (opponent.x > this.x) ? 1 : -1;
         }
 
-        class Particle {
-            constructor(x, y, color) {
-                this.x = x;
-                this.y = y;
-                this.color = color;
-                this.vx = (Math.random() - 0.5) * 6;
-                this.vy = (Math.random() - 0.5) * 6;
-                this.radius = Math.random() * 3 + 2;
-                this.alpha = 1;
-                this.life = 20 + Math.random() * 10;
-            }
+        if (this.x < 0) this.x = 0;
+        if (this.x > canvas.width - this.width) this.x = canvas.width - this.width;
 
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.alpha;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-                ctx.restore();
+        // --- 애니메이션 프레임 제어 ---
+        let totalFrames = this.framesPerAction[this.state] || 8;
+        
+        // DASH 상태일 때만 프레임 속도 빠르게 조절 (대쉬 프레임 부족 예외 처리 포함)
+        if(this.state === "DASH" && totalFrames < 8) {
+             if(this.frameCounter % 4 === 0) {
+                this.currentFrame = Math.min(totalFrames - 1, Math.floor((10 - this.stateTimer) / 3));
             }
-
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.alpha -= 1 / this.life;
+        } else {
+            // 다른 동작은 일반적인 속도로 루프
+            this.frameCounter++;
+            if(this.frameCounter % this.animSpeed === 0) {
+                this.currentFrame = (this.currentFrame + 1) % totalFrames;
             }
         }
-
-        function createParticles(x, y, color, count) {
-            for(let i=0; i<count; i++) {
-                particles.push(new Particle(x, y, color));
-            }
+        
+        // 상태가 바뀌면 프레임 초기화
+        if(this.stateTimer > 0 && this.currentFrame >= totalFrames) {
+             this.currentFrame = totalFrames - 1; 
         }
+    }
 
-        function spawnEnemy() {
-            if (!gameActive) return;
+    move(dir) {
+        if (["IDLE", "WALK"].includes(this.state) && this.isGrounded) {
+            this.x += dir * this.speed;
+            this.state = "WALK";
+        }
+    }
+
+    jump() {
+        if (this.isGrounded && ["IDLE", "WALK"].includes(this.state)) {
+            this.vy = -13;
+            this.isGrounded = false;
+            this.state = "JUMP";
+        }
+    }
+
+    guard(isGuarding) {
+        if (this.isGrounded && ["IDLE", "WALK", "GUARD"].includes(this.state)) {
+            this.state = isGuarding ? "GUARD" : "IDLE";
+        }
+    }
+
+    dash() {
+        if (this.dashCooldown === 0 && ["IDLE", "WALK"].includes(this.state)) {
+            this.state = "DASH";
+            this.vx = this.direction * 15;
+            this.stateTimer = 10; 
+            this.dashCooldown = 45; 
+        }
+    }
+
+    attack(opponent) {
+        if (["IDLE", "WALK", "JUMP"].includes(this.state)) {
+            this.state = "ATTACK";
+            this.stateTimer = 15; 
             
-            let x, y;
-            if (Math.random() < 0.5) {
-                x = Math.random() < 0.5 ? -30 : canvas.width + 30;
-                y = Math.random() * canvas.height;
-            } else {
-                x = Math.random() * canvas.width;
-                y = Math.random() < 0.5 ? -30 : canvas.height + 30;
+            let hitRange = this.direction === 1 ? this.x + this.width : this.x - 60;
+            if (this.checkCollision(hitRange, this.y, 60, this.height, opponent)) {
+                opponent.takeDamage(5, "NORMAL");
             }
+        }
+    }
 
-            let rand = Math.random();
-            let type = 'normal';
-            if (score > 150 && rand < 0.25) type = 'fast';
-            else if (score > 300 && rand > 0.8) type = 'tank';
-            else if (score > 600 && rand < 0.5) type = Math.random() > 0.5 ? 'fast' : 'tank';
+    useSkill(opponent) {
+        if (this.mp >= 30 && ["IDLE", "WALK"].includes(this.state)) {
+            this.mp -= 30;
+            this.state = "SKILL";
+            this.stateTimer = 30; 
+            this.vx = this.direction * 5; 
 
-            enemies.push(new Enemy(x, y, type));
+            let hitRange = this.direction === 1 ? this.x + this.width : this.x - 140;
+            if (this.checkCollision(hitRange, this.y, 140, this.height, opponent)) {
+                opponent.takeDamage(15, "SKILL");
+            }
+        }
+    }
+
+    takeDamage(amount, type) {
+        if (this.state === "GUARD" && type === "NORMAL") {
+            this.hp -= amount * 0.1; 
+            this.mp = Math.min(this.maxMp, this.mp + 5); 
+        } else {
+            this.hp -= amount;
+            this.state = "HIT";
+            this.stateTimer = 12;
+            this.vx = this.direction * -5; 
+        }
+        if (this.hp < 0) this.hp = 0;
+    }
+
+    checkCollision(ax, ay, aw, ah, opponent) {
+        return ax < opponent.x + opponent.width &&
+               ax + aw > opponent.x &&
+               ay < opponent.y + opponent.height &&
+               ay + ah > opponent.y;
+    }
+
+    draw() {
+        // 이미지가 로드되지 않았으면 임시 박스 그리기
+        if (!this.spriteImage.complete || !this.frameMap || this.frameMap[this.state] === undefined) {
+            this.drawTempBox();
+            return;
         }
 
-        function drawAttackSwipe() {
-            if (!attackEffect || attackEffect.life <= 0) return;
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(attackEffect.x, attackEffect.y, attackEffect.radius, attackEffect.angle - Math.PI / 3, attackEffect.angle + Math.PI / 3);
-            ctx.strokeStyle = `rgba(0, 240, 255, ${attackEffect.life / 10})`;
-            ctx.lineWidth = 4;
-            ctx.stroke();
-            ctx.restore();
-
-            attackEffect.life--;
+        // --- 스프라이트 좌표 계산 ---
+        let frameYIndex = this.frameMap[this.state];
+        let frameXIndex = this.currentFrame;
+        
+        // SkillAttack(R7) 프레임 부족 예외 처리
+        if(this.state === "SKILL" && this.framesPerAction["SKILL"] < 8 && frameXIndex >= 6) {
+             frameXIndex = 5;
         }
 
-        function startGame() {
-            startScreen.style.display = 'none';
-            gameOverScreen.style.display = 'none';
-            
-            player = new Player(canvas.width / 2, canvas.height / 2);
-            enemies = [];
-            particles = [];
-            score = 0;
-            scoreDisplay.innerText = `SCORE: ${score}`;
-            player.hp = player.maxHp;
-            hpBar.style.width = '100%';
-            
-            gameActive = true;
-            spawnTimer = 0;
-            spawnInterval = 90;
-            
-            for(let i=0; i<3; i++) spawnEnemy();
-        }
+        let frameWidth = 256;  
+        let frameHeight = 256; 
 
-        function endGame() {
-            gameActive = false;
-            gameOverScreen.style.display = 'flex';
-            finalScoreText.innerText = `최종 점수: ${score} 점`;
-        }
+        let sx = frameXIndex * frameWidth;
+        let sy = frameYIndex * frameHeight;
 
-        function restartGame() {
+        ctx.save();
+        // 캐릭터 반전 처리
+        if (this.direction === -1) {
+            ctx.translate(this.x + this.width, this.y);
+            ctx.scale(-1, 1);
+            ctx.drawImage(this.spriteImage, sx, sy, frameWidth, frameHeight, 0, 0, this.width, this.height);
+        } else {
+            ctx.translate(this.x, this.y);
+            ctx.drawImage(this.spriteImage, sx, sy, frameWidth, frameHeight, 0, 0, this.width, this.height);
+        }
+        ctx.restore();
+
+        // 이름 및 상태 텍스트
+        ctx.fillStyle = "#fff"; ctx.font = "12px sans-serif";
+        ctx.fillText(this.name, this.x + 10, this.y - 25);
+        ctx.fillText(this.state, this.x + 10, this.y - 10);
+
+        // 가드 이펙트
+        if (this.state === "GUARD") {
+            ctx.strokeStyle = "#00ffff"; ctx.lineWidth = 3;
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+        }
+    }
+
+    drawTempBox() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.fillStyle = "#fff"; ctx.font = "12px sans-serif";
+        ctx.fillText("IMG LOADING...", this.x + 10, this.y + this.height/2);
+    }
+}
+
+let player1;
+let player2;
+
+function selectMode(mode) {
+    gameMode = mode;
+    document.getElementById("mainMenu").classList.add("hidden");
+    document.getElementById("charSelect").classList.remove("hidden");
+    startCharSelect();
+}
+
+function startCharSelect() {
+    selectingPlayer = 1;
+    p1SelectedChar = null;
+    p2SelectedChar = null;
+    document.getElementById("selectTitle").innerText = "PLAYER 1 캐릭터를 선택하세요";
+    document.getElementById("controlInfo").innerHTML = `[1P 조작키] A,D: 이동 | W: 점프 | S: 방어 <br> F: 일반공격 | G: 스킬(기력30) | H: 대쉬`;
+    updateCharBoxes();
+}
+
+function chooseCharacter(id) {
+    if (selectingPlayer === 1) {
+        p1SelectedChar = id;
+        if (gameMode === 2) {
+            selectingPlayer = 2;
+            document.getElementById("selectTitle").innerText = "PLAYER 2 캐릭터를 선택하세요";
+            document.getElementById("controlInfo").innerHTML = `[2P 조작키] 방향키 ←,→: 이동 | ↑: 점프 | ↓: 방어 <br> 패드1: 일반공격 | 패드2: 스킬(기력30) | 패드3: 대쉬`;
+            updateCharBoxes();
+        } else {
+            p2SelectedChar = Math.floor(Math.random() * 4); 
             startGame();
         }
+    } else if (selectingPlayer === 2) {
+        p2SelectedChar = id;
+        startGame();
+    }
+}
 
-        function loop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.strokeStyle = '#2b2b2b';
-            ctx.lineWidth = 1;
-            const gridSize = 40;
-            for(let x=0; x<canvas.width; x+=gridSize) {
-                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-            }
-            for(let y=0; y<canvas.height; y+=gridSize) {
-                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-            }
+function updateCharBoxes() {
+    const boxes = document.querySelectorAll(".char-box");
+    boxes.forEach((box, idx) => {
+        box.className = "char-box";
+        if (idx === p1SelectedChar && idx === p2SelectedChar) box.classList.add("selected-both");
+        else if (idx === p1SelectedChar) box.classList.add("selected-p1");
+        else if (idx === p2SelectedChar) box.classList.add("selected-p2");
+    });
+}
 
-            if (gameActive) {
-                spawnTimer++;
-                let currentInterval = Math.max(25, spawnInterval - Math.floor(score / 20));
-                if (spawnTimer >= currentInterval) {
-                    spawnEnemy();
-                    spawnTimer = 0;
-                }
+function startGame() {
+    document.getElementById("charSelect").classList.add("hidden");
+    
+    player1 = new Fighter(150, 270, charactersData[p1SelectedChar].color, false, charactersData[p1SelectedChar]);
+    player2 = new Fighter(580, 270, charactersData[p2SelectedChar].color, true, charactersData[p2SelectedChar]);
 
-                player.update();
-                enemies.forEach(enemy => enemy.update());
-                particles.forEach(p => p.update());
-                particles = particles.filter(p => p.alpha > 0);
-            }
+    gameState = "PLAYING";
+    requestAnimationFrame(gameLoop);
+}
 
-            enemies.forEach(enemy => enemy.draw());
-            if (player && player.hp > 0) player.draw();
-            drawAttackSwipe();
-            particles.forEach(p => p.draw());
+// 키이벤트 핸들러
+window.addEventListener("keydown", (e) => {
+    if (e.code in keys) keys[e.code] = true;
+    
+    if (gameState === "PLAYING") {
+        if (e.code === "KeyW") player1.jump();
+        if (e.code === "KeyF") player1.attack(player2);
+        if (e.code === "KeyG") player1.useSkill(player2);
+        if (e.code === "KeyH") player1.dash();
 
-            requestAnimationFrame(loop);
+        if (gameMode === 2) {
+            if (e.code === "ArrowUp") player2.jump();
+            if (e.code === "Numpad1") player2.attack(player1);
+            if (e.code === "Numpad2") player2.useSkill(player1);
+            if (e.code === "Numpad3") player2.dash();
         }
+    }
+    
+    if (gameState === "GAME_OVER" && e.code === "Escape") {
+        document.getElementById("mainMenu").classList.remove("hidden");
+        gameState = "MENU";
+    }
+});
 
-        loop();
-    </script>
+window.addEventListener("keyup", (e) => {
+    if (e.code in keys) keys[e.code] = false;
+});
+
+function runAI() {
+    if (player2.state === "HIT") return;
+    let distance = Math.abs(player1.x - player2.x);
+
+    if (player1.state === "ATTACK" && distance < 100 && Math.random() < 0.4) {
+        player2.guard(true);
+        return;
+    } else {
+        player2.guard(false);
+    }
+
+    if (distance > 130) {
+        player2.move(player2.direction);
+        if(Math.random() < 0.02) player2.dash();
+    } else {
+        if (Math.random() < 0.05) {
+            player2.attack(player1);
+        } else if (player2.mp >= 30 && Math.random() < 0.03) {
+            player2.useSkill(player1);
+        }
+    }
+}
+
+function drawUI() {
+    ctx.fillStyle = "#555"; ctx.fillRect(30, 25, 300, 20);
+    ctx.fillStyle = "#ff4d4d"; ctx.fillRect(30, 25, 300 * (player1.hp / player1.maxHp), 20);
+    ctx.fillStyle = "#555"; ctx.fillRect(30, 50, 200, 10);
+    ctx.fillStyle = "#33ccff"; ctx.fillRect(30, 50, 200 * (player1.mp / player1.maxMp), 10);
+    
+    ctx.fillStyle = "#555"; ctx.fillRect(470, 25, 300, 20);
+    ctx.fillStyle = "#ff4d4d"; ctx.fillRect(470 + (300 - 300 * (player2.hp / player2.maxHp)), 25, 300 * (player2.hp / player2.maxHp), 20);
+    ctx.fillStyle = "#555"; ctx.fillRect(570, 50, 200, 10);
+    ctx.fillStyle = "#33ccff"; ctx.fillRect(570 + (200 - 200 * (player2.mp / player2.maxMp)), 50, 200 * (player2.mp / player2.maxMp), 10);
+
+    ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif";
+    ctx.fillText(player1.name, 30, 18);
+    ctx.fillText(player2.name, 770 - ctx.measureText(player2.name).width, 18);
+}
+
+function gameLoop() {
+    if (gameState !== "PLAYING") return;
+
+    if (keys.KeyA) player1.move(-1);
+    if (keys.KeyD) player1.move(1);
+    player1.guard(keys.KeyS);
+
+    if (gameMode === 2) {
+        if (keys.ArrowLeft) player2.move(-1);
+        if (keys.ArrowRight) player2.move(1);
+        player2.guard(keys.ArrowDown);
+    } else {
+        runAI();
+    }
+
+    player1.update(player2);
+    player2.update(player1);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.strokeStyle = "#666"; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(0, 400); ctx.lineTo(canvas.width, 400); ctx.stroke();
+
+    player1.draw();
+    player2.draw();
+    drawUI();
+
+    if (player1.hp <= 0 || player2.hp <= 0) {
+        gameState = "GAME_OVER";
+        ctx.fillStyle = "rgba(0,0,0,0.7)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#ffcc00";
+        ctx.font = "bold 40px sans-serif";
+        
+        let winText = player1.hp <= 0 ? `${player2.name} 승리!` : `${player1.name} 승리!`;
+        ctx.fillText(winText, canvas.width/2 - ctx.measureText(winText).width/2, 220);
+        
+        ctx.fillStyle = "#fff";
+        ctx.font = "20px sans-serif";
+        ctx.fillText("메뉴로 돌아가려면 ESC를 누르세요", canvas.width/2 - 150, 280);
+        return;
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+</script>
 </body>
 </html>
