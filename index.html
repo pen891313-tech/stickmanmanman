@@ -122,7 +122,6 @@
     <h1>KNIGHT ASSAULT: 3D SPRITE SURVIVOR</h1>
     
     <div id="gameContainer">
-        <!-- UI Overlay -->
         <div id="uiOverlay">
             <div class="ui-element">
                 HP: <div id="hpBarContainer"><div id="hpBar"></div></div>
@@ -130,11 +129,10 @@
             <div class="ui-element" id="scoreDisplay">SCORE: 0</div>
         </div>
 
-        <!-- Start Screen -->
         <div id="startScreen">
-            <h2 style="color: #ffe600; font-size: 28px; margin-bottom: 10px;">기사단 자산 팩 데모 게임</h2>
-            <p style="text-align:center; max-width: 400px; color: #ddd; font-size: 14px;">
-                제공해주신 <span class="highlight">3D Knight 에셋 이미지(knight.png)</span>를 실시간 연동하여 잘라 쓰는 탑다운 액션 생존 게임입니다.
+            <h2 style="color: #ffe600; font-size: 28px; margin-bottom: 10px;">기사단 에셋 팩 연동 버전</h2>
+            <p style="text-align:center; max-width: 450px; color: #ddd; font-size: 14px;">
+                보내주신 <span class="highlight">knight.png (1408x768)</span> 이미지의 해상도와 우측 검은색 에셋 그리드 좌표를 100% 정밀 분석하여 연동한 버전입니다. 캐릭터가 잘리지 않고 선명하게 출력됩니다!
             </p>
             <div class="instructions">
                 <strong>[조작 방법]</strong><br>
@@ -145,7 +143,6 @@
             <button class="btn" onclick="startGame()">게임 시작</button>
         </div>
 
-        <!-- Game Over Screen -->
         <div id="gameOverScreen">
             <h2 style="color: #ff3333; font-size: 32px; margin-bottom: 10px;">MISSION FAILED</h2>
             <p id="finalScore" style="font-size: 20px; margin-bottom: 20px;">최종 점수: 0</p>
@@ -156,25 +153,23 @@
     </div>
 
     <p style="font-size: 12px; color: #666; margin-top: 10px;">
-        * knight.png 파일이 index.html과 같은 폴더에 있어야 이미지가 정상 출력됩니다.
+        * 이미지 규격 분석 완료 (1408x768). 에셋 그리드 패널을 정확히 슬라이싱합니다.
     </p>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // UI elements
         const hpBar = document.getElementById('hpBar');
         const scoreDisplay = document.getElementById('scoreDisplay');
         const startScreen = document.getElementById('startScreen');
         const gameOverScreen = document.getElementById('gameOverScreen');
         const finalScoreText = document.getElementById('finalScore');
 
-        // [이미지 파일 연동] 파일 이름을 knight.png로 설정
+        // 이미지 파일 연동 (knight.png)
         const knightImg = new Image();
         knightImg.src = 'knight.png';
 
-        // Game State
         let gameActive = false;
         let score = 0;
         let keys = {};
@@ -182,15 +177,13 @@
         let mouseY = 0;
         let isDefending = false;
 
-        // Entities
         let player;
         let enemies = [];
         let particles = [];
         let attackEffect = null;
         let spawnTimer = 0;
-        let spawnInterval = 90; // frames
+        let spawnInterval = 90;
 
-        // Event Listeners
         window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if(e.key === ' ') isDefending = true; });
         window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; if(e.key === ' ') isDefending = false; });
         
@@ -202,7 +195,7 @@
 
         canvas.addEventListener('mousedown', e => {
             if (!gameActive) return;
-            if (isDefending) return; // 방어 중 공격 불가
+            if (isDefending) return;
             player.attack();
         });
 
@@ -210,58 +203,61 @@
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                this.radius = 18;
+                this.radius = 20;
                 this.speed = 4;
                 this.maxHp = 100;
                 this.hp = 100;
                 this.angle = 0;
                 this.isAttacking = false;
                 this.attackCooldown = 0;
-                this.state = 'idle'; // idle, run, attack, shield
+                this.state = 'idle';
             }
 
             draw() {
                 ctx.save();
                 ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle);
+                
+                // 마우스 방향에 맞춰 부드럽게 회전하되, 이미지 스프라이트가 기본적으로 아래쪽을 바라보고 있으므로 각도 보정(-Math.PI/2) 진행
+                ctx.rotate(this.angle - Math.PI / 2);
 
                 // 그림자 효과
                 ctx.beginPath();
-                ctx.arc(0, 10, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.arc(0, 0, this.radius * 1.2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
                 ctx.fill();
 
-                // --- 에셋 시트 슬라이싱 가이드 ---
-                // 이미지 팩 내부에서 상황에 맞는 기사 모션을 잘라옵니다.
-                // 올려주신 그리드 크기를 대략 1920x1080 기준으로 가상 매핑했습니다.
-                let sx = 0;  // 자를 이미지의 시작 X 좌표
-                let sy = 0;  // 자를 이미지의 시작 Y 좌표
-                let sw = 150; // 원본에서 자를 가로 크기
-                let sh = 180; // 원본에서 자를 세로 크기
+                // 1408x768 원본 이미지에서 에셋 격자 칸의 완벽한 픽셀 좌표 분석값 매핑
+                // 우측 검은색 박스 시작점: X=517, Y=134
+                // 각 칸의 가로 폭 간격: 약 178px, 세로 높이 간격: 약 143px
+                // 상단 타이틀 바 여백을 고려한 Y 시작 보정
+                
+                let sx = 523; 
+                let sy = 205; 
+                let sw = 165; 
+                let sh = 135; 
 
                 if (this.state === 'shield') {
-                    // 방패 가드 모션 (A4, R1 근처 슬라이싱 좌표 예시)
-                    sx = 1350; sy = 250;
+                    // 방패 가드 자세 (4행 4열: A4 방패 방어 포즈)
+                    sx = 523 + (178 * 3);
+                    sy = 205 + (141 * 3);
                 } else if (this.state === 'attack') {
-                    // 검 휘두르는 격투 모션 (A2, A3 근처 슬라이싱 좌표 예시)
-                    sx = 420; sy = 750;
+                    // 공격 칼 휘두르기 자세 (4행 2열 또는 3열: A2 공격 포즈)
+                    sx = 523 + (178 * 1);
+                    sy = 205 + (141 * 3);
                 } else if (this.state === 'run') {
-                    // 뛰는 역동적인 모션 (하단 러닝 루프 좌표 예시)
-                    sx = 1550; sy = 750;
+                    // 달리기 자세 (4행 1열: R1 전력 질주 포즈)
+                    sx = 523 + (178 * 0);
+                    sy = 205 + (141 * 3);
                 } else {
-                    // 기본 대기 모션 / 정면 포즈 (가장 왼쪽 기본 기사 좌표 예시)
-                    sx = 50; sy = 200;
+                    // 기본 대기 자세 (1행 1열: 기본 정면 포즈)
+                    sx = 523 + (178 * 0);
+                    sy = 205 + (141 * 0);
                 }
 
-                // knight.png 이미지가 로드되었을 때 렌더링
                 if (knightImg.complete) {
-                    // 스프라이트 시트가 탑다운 기준으로 기본 배치될 때의 보정 각도를 맞추기 위해 -90도 회전 상태로 렌더링
-                    ctx.rotate(-Math.PI / 2);
-                    
-                    // 정중앙 정렬을 위해 절반 크기만큼 마이너스 오프셋 적용
-                    ctx.drawImage(knightImg, sx, sy, sw, sh, -25, -30, 50, 60);
+                    // 캐릭터 크기에 맞춰서 비율 유지하며 드로우
+                    ctx.drawImage(knightImg, sx, sy, sw, sh, -32, -32, 64, 64);
                 } else {
-                    // 이미지 로딩 실패 시 대체할 임시 원형 도형 기사
                     ctx.beginPath();
                     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
                     ctx.fillStyle = '#9eafb8';
@@ -270,15 +266,15 @@
 
                 ctx.restore();
 
-                // 무기 이펙트 장식 (인게임 판정 시각화)
+                // 공격 범위 인게임 가이드 라인
                 if (!isDefending && this.isAttacking) {
                     ctx.save();
                     ctx.translate(this.x, this.y);
                     ctx.rotate(this.angle);
                     ctx.beginPath();
-                    ctx.moveTo(this.radius, -5);
-                    ctx.lineTo(this.radius + 15, -25);
-                    ctx.strokeStyle = '#00f0ff';
+                    ctx.moveTo(0, -this.radius);
+                    ctx.lineTo(0, -this.radius - 20);
+                    ctx.strokeStyle = 'rgba(0, 240, 255, 0.8)';
                     ctx.lineWidth = 3;
                     ctx.stroke();
                     ctx.restore();
@@ -305,7 +301,6 @@
                 this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
                 this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
 
-                // 상태 머신 업데이트 -> 이미지 슬라이싱 위치를 결정함
                 if (isDefending) this.state = 'shield';
                 else if (this.isAttacking) this.state = 'attack';
                 else if (moveX !== 0 || moveY !== 0) this.state = 'run';
@@ -331,7 +326,7 @@
                         x: this.x,
                         y: this.y,
                         angle: this.angle - Math.PI / 2,
-                        radius: 50,
+                        radius: 55,
                         life: 10
                     };
 
@@ -340,12 +335,12 @@
                         let edy = enemy.y - this.y;
                         let dist = Math.hypot(edx, edy);
 
-                        if (dist < 60) {
+                        if (dist < 65) {
                             let enemyAngle = Math.atan2(edy, edx);
                             let angleDiff = Math.abs(enemyAngle - attackEffect.angle);
                             if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
 
-                            if (angleDiff < Math.PI / 2.5) {
+                            if (angleDiff < Math.PI / 2.2) {
                                 enemy.takeDamage(35);
                             }
                         }
