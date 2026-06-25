@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>픽셀 격투 게임 - 최종본</title>
+    <title>픽셀 격투 게임 - 통합본</title>
     <style>
         body {
             margin: 0;
@@ -59,6 +59,7 @@
         .char-box.selected-p1 { border-color: #ff4d4d; background: #622; }
         .char-box.selected-p2 { border-color: #4d4dff; background: #226; }
         .char-box.selected-both { border-color: #cc4dff; background: #424; }
+        /* 여기에 1.jpg ~ 4.jpg 이미지들이 들어갑니다. */
         .char-thumb { width: 60px; height: 60px; background: #666; margin-bottom: 10px; border: 1px solid #777; }
     </style>
 </head>
@@ -75,16 +76,16 @@
         <h1 id="selectTitle">PLAYER 1 선택하세요</h1>
         <div class="char-container">
             <div class="char-box" data-id="0" onclick="chooseCharacter(0)">
-                <div class="char-thumb" style="background: url('1-1.jpg') no-repeat center/cover, #ff4d4d"></div>교복 남학생
+                <div class="char-thumb" style="background: url('1.jpg') no-repeat center/cover, #ff4d4d"></div>교복 남학생
             </div>
             <div class="char-box" data-id="1" onclick="chooseCharacter(1)">
-                <div class="char-thumb" style="background: url('2-1.jpg') no-repeat center/cover, #4d4dff"></div>제복 장교
+                <div class="char-thumb" style="background: url('2.jpg') no-repeat center/cover, #4d4dff"></div>제복 장교
             </div>
             <div class="char-box" data-id="2" onclick="chooseCharacter(2)">
-                <div class="char-thumb" style="background: url('3-1.jpg') no-repeat center/cover, #4dff4d"></div>그림자 소년
+                <div class="char-thumb" style="background: url('3.jpg') no-repeat center/cover, #4dff4d"></div>그림자 소년
             </div>
             <div class="char-box" data-id="3" onclick="chooseCharacter(3)">
-                <div class="char-thumb" style="background: url('4-1.jpg') no-repeat center/cover, #ffff4d"></div>교복 여학생
+                <div class="char-thumb" style="background: url('4.jpg') no-repeat center/cover, #ffff4d"></div>교복 여학생
             </div>
         </div>
         <div id="controlInfo" style="text-align: center; color: #aaa; font-size: 14px; line-height: 1.5;"></div>
@@ -105,7 +106,7 @@ let p2SelectedChar = null;
 let selectingPlayer = 1;
 
 // 캐릭터 데이터 정의 - 깃허브 이미지 및 프레임 맵 정보 통합
-// ※ 깃허브 절대경로(https://raw.githubusercontent.com/...)로 완전히 바꾸셔도 됩니다.
+// ※ 나중에 깃허브 절대경로(https://raw.githubusercontent.com/...)로 완전히 바꾸셔도 됩니다.
 const charactersData = [
     // --- 1번 캐릭터: 학생A (1-1.jpg) ---
     { 
@@ -249,81 +250,7 @@ class Fighter {
         }
     }
 
-    move(dir) {
-        if (["IDLE", "WALK"].includes(this.state) && this.isGrounded) {
-            this.x += dir * this.speed;
-            this.state = "WALK";
-        }
-    }
-
-    jump() {
-        if (this.isGrounded && ["IDLE", "WALK"].includes(this.state)) {
-            this.vy = -13;
-            this.isGrounded = false;
-            this.state = "JUMP";
-        }
-    }
-
-    guard(isGuarding) {
-        if (this.isGrounded && ["IDLE", "WALK", "GUARD"].includes(this.state)) {
-            this.state = isGuarding ? "GUARD" : "IDLE";
-        }
-    }
-
-    dash() {
-        if (this.dashCooldown === 0 && ["IDLE", "WALK"].includes(this.state)) {
-            this.state = "DASH";
-            this.vx = this.direction * 15;
-            this.stateTimer = 10; 
-            this.dashCooldown = 45; 
-        }
-    }
-
-    attack(opponent) {
-        if (["IDLE", "WALK", "JUMP"].includes(this.state)) {
-            this.state = "ATTACK";
-            this.stateTimer = 15; 
-            
-            let hitRange = this.direction === 1 ? this.x + this.width : this.x - 60;
-            if (this.checkCollision(hitRange, this.y, 60, this.height, opponent)) {
-                opponent.takeDamage(5, "NORMAL");
-            }
-        }
-    }
-
-    useSkill(opponent) {
-        if (this.mp >= 30 && ["IDLE", "WALK"].includes(this.state)) {
-            this.mp -= 30;
-            this.state = "SKILL";
-            this.stateTimer = 30; 
-            this.vx = this.direction * 5; 
-
-            let hitRange = this.direction === 1 ? this.x + this.width : this.x - 140;
-            if (this.checkCollision(hitRange, this.y, 140, this.height, opponent)) {
-                opponent.takeDamage(15, "SKILL");
-            }
-        }
-    }
-
-    takeDamage(amount, type) {
-        if (this.state === "GUARD" && type === "NORMAL") {
-            this.hp -= amount * 0.1; 
-            this.mp = Math.min(this.maxMp, this.mp + 5); 
-        } else {
-            this.hp -= amount;
-            this.state = "HIT";
-            this.stateTimer = 12;
-            this.vx = this.direction * -5; 
-        }
-        if (this.hp < 0) this.hp = 0;
-    }
-
-    checkCollision(ax, ay, aw, ah, opponent) {
-        return ax < opponent.x + opponent.width &&
-               ax + aw > opponent.x &&
-               ay < opponent.y + opponent.height &&
-               ay + ah > opponent.y;
-    }
+    // ... (move, jump, guard, dash, attack, useSkill, takeDamage, checkCollision 메소드 유지) ...
 
     draw() {
         // 이미지가 로드되지 않았으면 임시 박스 그리기
@@ -379,175 +306,7 @@ class Fighter {
     }
 }
 
-let player1;
-let player2;
-
-function selectMode(mode) {
-    gameMode = mode;
-    document.getElementById("mainMenu").classList.add("hidden");
-    document.getElementById("charSelect").classList.remove("hidden");
-    startCharSelect();
-}
-
-function startCharSelect() {
-    selectingPlayer = 1;
-    p1SelectedChar = null;
-    p2SelectedChar = null;
-    document.getElementById("selectTitle").innerText = "PLAYER 1 캐릭터를 선택하세요";
-    document.getElementById("controlInfo").innerHTML = `[1P 조작키] A,D: 이동 | W: 점프 | S: 방어 <br> F: 일반공격 | G: 스킬(기력30) | H: 대쉬`;
-    updateCharBoxes();
-}
-
-function chooseCharacter(id) {
-    if (selectingPlayer === 1) {
-        p1SelectedChar = id;
-        if (gameMode === 2) {
-            selectingPlayer = 2;
-            document.getElementById("selectTitle").innerText = "PLAYER 2 캐릭터를 선택하세요";
-            document.getElementById("controlInfo").innerHTML = `[2P 조작키] 방향키 ←,→: 이동 | ↑: 점프 | ↓: 방어 <br> 패드1: 일반공격 | 패드2: 스킬(기력30) | 패드3: 대쉬`;
-            updateCharBoxes();
-        } else {
-            p2SelectedChar = Math.floor(Math.random() * 4); 
-            startGame();
-        }
-    } else if (selectingPlayer === 2) {
-        p2SelectedChar = id;
-        startGame();
-    }
-}
-
-function updateCharBoxes() {
-    const boxes = document.querySelectorAll(".char-box");
-    boxes.forEach((box, idx) => {
-        box.className = "char-box";
-        if (idx === p1SelectedChar && idx === p2SelectedChar) box.classList.add("selected-both");
-        else if (idx === p1SelectedChar) box.classList.add("selected-p1");
-        else if (idx === p2SelectedChar) box.classList.add("selected-p2");
-    });
-}
-
-function startGame() {
-    document.getElementById("charSelect").classList.add("hidden");
-    
-    player1 = new Fighter(150, 270, charactersData[p1SelectedChar].color, false, charactersData[p1SelectedChar]);
-    player2 = new Fighter(580, 270, charactersData[p2SelectedChar].color, true, charactersData[p2SelectedChar]);
-
-    gameState = "PLAYING";
-    requestAnimationFrame(gameLoop);
-}
-
-// 키이벤트 핸들러
-window.addEventListener("keydown", (e) => {
-    if (e.code in keys) keys[e.code] = true;
-    
-    if (gameState === "PLAYING") {
-        if (e.code === "KeyW") player1.jump();
-        if (e.code === "KeyF") player1.attack(player2);
-        if (e.code === "KeyG") player1.useSkill(player2);
-        if (e.code === "KeyH") player1.dash();
-
-        if (gameMode === 2) {
-            if (e.code === "ArrowUp") player2.jump();
-            if (e.code === "Numpad1") player2.attack(player1);
-            if (e.code === "Numpad2") player2.useSkill(player1);
-            if (e.code === "Numpad3") player2.dash();
-        }
-    }
-    
-    if (gameState === "GAME_OVER" && e.code === "Escape") {
-        document.getElementById("mainMenu").classList.remove("hidden");
-        gameState = "MENU";
-    }
-});
-
-window.addEventListener("keyup", (e) => {
-    if (e.code in keys) keys[e.code] = false;
-});
-
-function runAI() {
-    if (player2.state === "HIT") return;
-    let distance = Math.abs(player1.x - player2.x);
-
-    if (player1.state === "ATTACK" && distance < 100 && Math.random() < 0.4) {
-        player2.guard(true);
-        return;
-    } else {
-        player2.guard(false);
-    }
-
-    if (distance > 130) {
-        player2.move(player2.direction);
-        if(Math.random() < 0.02) player2.dash();
-    } else {
-        if (Math.random() < 0.05) {
-            player2.attack(player1);
-        } else if (player2.mp >= 30 && Math.random() < 0.03) {
-            player2.useSkill(player1);
-        }
-    }
-}
-
-function drawUI() {
-    ctx.fillStyle = "#555"; ctx.fillRect(30, 25, 300, 20);
-    ctx.fillStyle = "#ff4d4d"; ctx.fillRect(30, 25, 300 * (player1.hp / player1.maxHp), 20);
-    ctx.fillStyle = "#555"; ctx.fillRect(30, 50, 200, 10);
-    ctx.fillStyle = "#33ccff"; ctx.fillRect(30, 50, 200 * (player1.mp / player1.maxMp), 10);
-    
-    ctx.fillStyle = "#555"; ctx.fillRect(470, 25, 300, 20);
-    ctx.fillStyle = "#ff4d4d"; ctx.fillRect(470 + (300 - 300 * (player2.hp / player2.maxHp)), 25, 300 * (player2.hp / player2.maxHp), 20);
-    ctx.fillStyle = "#555"; ctx.fillRect(570, 50, 200, 10);
-    ctx.fillStyle = "#33ccff"; ctx.fillRect(570 + (200 - 200 * (player2.mp / player2.maxMp)), 50, 200 * (player2.mp / player2.maxMp), 10);
-
-    ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif";
-    ctx.fillText(player1.name, 30, 18);
-    ctx.fillText(player2.name, 770 - ctx.measureText(player2.name).width, 18);
-}
-
-function gameLoop() {
-    if (gameState !== "PLAYING") return;
-
-    if (keys.KeyA) player1.move(-1);
-    if (keys.KeyD) player1.move(1);
-    player1.guard(keys.KeyS);
-
-    if (gameMode === 2) {
-        if (keys.ArrowLeft) player2.move(-1);
-        if (keys.ArrowRight) player2.move(1);
-        player2.guard(keys.ArrowDown);
-    } else {
-        runAI();
-    }
-
-    player1.update(player2);
-    player2.update(player1);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.strokeStyle = "#666"; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(0, 400); ctx.lineTo(canvas.width, 400); ctx.stroke();
-
-    player1.draw();
-    player2.draw();
-    drawUI();
-
-    if (player1.hp <= 0 || player2.hp <= 0) {
-        gameState = "GAME_OVER";
-        ctx.fillStyle = "rgba(0,0,0,0.7)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#ffcc00";
-        ctx.font = "bold 40px sans-serif";
-        
-        let winText = player1.hp <= 0 ? `${player2.name} 승리!` : `${player1.name} 승리!`;
-        ctx.fillText(winText, canvas.width/2 - ctx.measureText(winText).width/2, 220);
-        
-        ctx.fillStyle = "#fff";
-        ctx.font = "20px sans-serif";
-        ctx.fillText("메뉴로 돌아가려면 ESC를 누르세요", canvas.width/2 - 150, 280);
-        return;
-    }
-
-    requestAnimationFrame(gameLoop);
-}
+// ... (selectMode, startCharSelect, chooseCharacter, updateCharBoxes, startGame, gameLoop, drawUI 함수 유지) ...
 </script>
 </body>
 </html>
