@@ -5,96 +5,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ARENA 03 - Fighting Game</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box;}
-  :root{
-    --bg:#0a0a0f;--panel:#10101a;--border:#1e1e3a;
-    --accent:#3a6fff;--accent2:#ff3a6e;--gold:#ffd700;
-    --text:#c8d0e7;--dim:#4a5070;
-  }
-  body{
-    background:var(--bg);color:var(--text);
-    font-family:'Rajdhani',sans-serif;
-    overflow:hidden;width:100vw;height:100vh;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-  .screen.hidden{display:none;}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0a0f;--panel:#10101a;--border:#1e1e3a;
+  --accent:#3a6fff;--accent2:#ff3a6e;--gold:#ffd700;
+  --text:#c8d0e7;--dim:#4a5070;
+}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
+.screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.screen.hidden{display:none;}
 
-  /* ── TITLE ── */
-  #titleScreen{flex-direction:column;background:radial-gradient(ellipse at center,#0d0d2b 0%,#050508 70%);}
-  .title-logo{
-    font-family:'Orbitron',monospace;font-size:clamp(48px,8vw,96px);
-    font-weight:900;letter-spacing:.15em;color:#fff;
-    text-shadow:0 0 40px var(--accent),0 0 80px var(--accent);
-    animation:pulse 2s ease-in-out infinite;
-  }
-  .title-sub{font-family:'Orbitron',monospace;font-size:clamp(12px,2vw,18px);letter-spacing:.5em;color:var(--accent);margin-top:12px;}
-  .title-press{margin-top:60px;font-size:20px;letter-spacing:.3em;color:var(--gold);animation:blink 1.2s step-end infinite;cursor:pointer;}
-  .title-stars{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
-  .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--d) ease-in-out infinite var(--del);}
+/* TITLE */
+#titleScreen{flex-direction:column;background:radial-gradient(ellipse at center,#0d0d2b 0%,#050508 70%);}
+.title-logo{font-family:'Orbitron',monospace;font-size:clamp(48px,8vw,96px);font-weight:900;letter-spacing:.15em;color:#fff;text-shadow:0 0 40px var(--accent),0 0 80px var(--accent);animation:pulse 2s ease-in-out infinite;}
+.title-sub{font-family:'Orbitron',monospace;font-size:clamp(12px,2vw,18px);letter-spacing:.5em;color:var(--accent);margin-top:12px;}
+.title-press{margin-top:60px;font-size:20px;letter-spacing:.3em;color:var(--gold);animation:blink 1.2s step-end infinite;cursor:pointer;}
+.title-stars{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--d) ease-in-out infinite var(--del);}
 
-  /* ── SELECT ── */
-  #selectScreen{flex-direction:column;background:linear-gradient(160deg,#08081a 0%,#0a0a18 100%);}
-  .select-title{font-family:'Orbitron',monospace;font-size:clamp(14px,2.5vw,22px);letter-spacing:.4em;color:var(--accent);margin-bottom:24px;}
-  .select-wrapper{display:flex;gap:32px;align-items:flex-start;}
-  .char-grid{display:grid;grid-template-columns:repeat(2,110px);gap:12px;}
-  .char-card{
-    width:110px;height:140px;border:2px solid var(--border);border-radius:8px;
-    overflow:hidden;cursor:pointer;position:relative;background:var(--panel);
-    transition:border-color .15s,transform .15s;
-  }
-  .char-card:hover{border-color:var(--accent);transform:scale(1.04);}
-  .char-card.sel-p1{border-color:var(--accent);box-shadow:0 0 16px var(--accent);}
-  .char-card.sel-p2{border-color:var(--accent2);box-shadow:0 0 16px var(--accent2);}
-  .char-card img{width:100%;height:100%;object-fit:cover;object-position:top center;}
-  .char-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.75);font-size:10px;letter-spacing:.05em;text-align:center;padding:3px;}
-  .badge{position:absolute;top:4px;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;}
-  .b1{left:4px;background:var(--accent);color:#fff;}
-  .b2{right:4px;background:var(--accent2);color:#fff;}
+/* SELECT */
+#selectScreen{flex-direction:column;background:linear-gradient(160deg,#08081a 0%,#0a0a18 100%);}
+.select-title{font-family:'Orbitron',monospace;font-size:clamp(14px,2.5vw,20px);letter-spacing:.4em;color:var(--accent);margin-bottom:22px;}
+.select-wrapper{display:flex;gap:28px;align-items:flex-start;}
+.char-grid{display:grid;grid-template-columns:repeat(2,110px);gap:10px;}
+.char-card{width:110px;height:138px;border:2px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;position:relative;background:var(--panel);transition:border-color .15s,transform .15s;}
+.char-card:hover{border-color:var(--accent);transform:scale(1.04);}
+.char-card.sel-p1{border-color:var(--accent);box-shadow:0 0 14px var(--accent);}
+.char-card.sel-p2{border-color:var(--accent2);box-shadow:0 0 14px var(--accent2);}
+.char-card img{width:100%;height:100%;object-fit:cover;object-position:top center;}
+.char-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.75);font-size:10px;letter-spacing:.05em;text-align:center;padding:3px;}
+.badge{position:absolute;top:4px;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;}
+.b1{left:4px;background:var(--accent);color:#fff;}
+.b2{right:4px;background:var(--accent2);color:#fff;}
+.preview-box{width:145px;display:flex;flex-direction:column;align-items:center;gap:7px;}
+.preview-label{font-family:'Orbitron',monospace;font-size:12px;letter-spacing:.3em;}
+.p1-lbl{color:var(--accent);}  .p2-lbl{color:var(--accent2);}
+.preview-img{width:125px;height:165px;border:2px solid var(--border);border-radius:6px;background:var(--panel);object-fit:cover;object-position:top center;}
+.preview-name{font-size:13px;font-weight:700;letter-spacing:.1em;}
+.key-panel{margin-top:14px;background:rgba(0,0,0,.45);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:11px;}
+.key-panel h4{font-family:'Orbitron',monospace;font-size:9px;color:var(--accent);letter-spacing:.25em;margin-bottom:8px;text-align:center;}
+.key-row{display:flex;gap:20px;justify-content:center;}
+.key-col{display:flex;flex-direction:column;gap:4px;}
+.key-col b{color:#888;font-size:10px;margin-bottom:2px;}
+.key-col span{display:flex;align-items:center;gap:4px;color:var(--dim);}
+kbd{background:#1a1a2e;border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#ccc;font-family:monospace;}
+.btn-start{margin-top:12px;background:linear-gradient(135deg,var(--accent),#5a8fff);border:none;border-radius:6px;color:#fff;font-family:'Orbitron',monospace;font-size:13px;letter-spacing:.3em;padding:10px 34px;cursor:pointer;transition:opacity .15s;}
+.btn-start:disabled{opacity:.3;cursor:not-allowed;}
+.btn-start:not(:disabled):hover{opacity:.8;}
+.select-hint{margin-top:6px;font-size:10px;color:var(--dim);letter-spacing:.1em;text-align:center;}
 
-  .preview-box{width:150px;display:flex;flex-direction:column;align-items:center;gap:8px;}
-  .preview-label{font-family:'Orbitron',monospace;font-size:12px;letter-spacing:.3em;}
-  .p1-lbl{color:var(--accent);}  .p2-lbl{color:var(--accent2);}
-  .preview-img{width:130px;height:170px;border:2px solid var(--border);border-radius:6px;background:var(--panel);object-fit:cover;object-position:top center;}
-  .preview-name{font-size:13px;font-weight:700;letter-spacing:.1em;}
+/* GAME */
+#gameScreen{flex-direction:column;background:#000;}
+#gameCanvas{display:block;}
 
-  /* 조작키 안내 (선택화면) */
-  .key-panel{margin-top:16px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--dim);}
-  .key-panel h4{font-family:'Orbitron',monospace;font-size:10px;color:var(--accent);letter-spacing:.2em;margin-bottom:6px;}
-  .key-row{display:flex;justify-content:space-between;gap:24px;}
-  .key-col{display:flex;flex-direction:column;gap:3px;}
-  .key-col span{display:flex;align-items:center;gap:5px;}
-  kbd{background:var(--panel);border:1px solid #333;border-radius:3px;padding:1px 5px;font-size:10px;color:#fff;font-family:monospace;}
+/* RESULT */
+#resultScreen{flex-direction:column;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);}
+.result-text{font-family:'Orbitron',monospace;font-size:clamp(36px,7vw,72px);font-weight:900;letter-spacing:.2em;animation:pulse 1.5s ease-in-out infinite;}
+.result-winner{font-size:20px;letter-spacing:.3em;margin-top:14px;color:var(--gold);}
+.result-btns{display:flex;gap:14px;margin-top:36px;}
+.result-btn{background:var(--panel);border:2px solid var(--border);border-radius:6px;color:var(--text);font-family:'Orbitron',monospace;font-size:12px;letter-spacing:.2em;padding:10px 24px;cursor:pointer;transition:border-color .15s,color .15s;}
+.result-btn:hover{border-color:var(--accent);color:var(--accent);}
 
-  .btn-start{
-    margin-top:16px;background:linear-gradient(135deg,var(--accent),#5a8fff);
-    border:none;border-radius:6px;color:#fff;font-family:'Orbitron',monospace;
-    font-size:13px;letter-spacing:.3em;padding:11px 36px;cursor:pointer;transition:opacity .15s;
-  }
-  .btn-start:disabled{opacity:.3;cursor:not-allowed;}
-  .btn-start:not(:disabled):hover{opacity:.8;}
-  .select-hint{margin-top:8px;font-size:11px;color:var(--dim);letter-spacing:.15em;text-align:center;}
-
-  /* ── GAME ── */
-  #gameScreen{flex-direction:column;background:#000;}
-  #gameCanvas{display:block;}
-
-  /* ── RESULT ── */
-  #resultScreen{flex-direction:column;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);}
-  .result-text{font-family:'Orbitron',monospace;font-size:clamp(36px,7vw,72px);font-weight:900;letter-spacing:.2em;animation:pulse 1.5s ease-in-out infinite;}
-  .result-winner{font-size:20px;letter-spacing:.3em;margin-top:14px;color:var(--gold);}
-  .result-btns{display:flex;gap:14px;margin-top:36px;}
-  .result-btn{
-    background:var(--panel);border:2px solid var(--border);border-radius:6px;
-    color:var(--text);font-family:'Orbitron',monospace;font-size:12px;letter-spacing:.2em;
-    padding:10px 24px;cursor:pointer;transition:border-color .15s,color .15s;
-  }
-  .result-btn:hover{border-color:var(--accent);color:var(--accent);}
-
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-  @keyframes twinkle{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
 </style>
 </head>
 <body>
@@ -113,22 +88,19 @@
 <div id="selectScreen" class="screen hidden">
   <div class="select-title">― SELECT YOUR FIGHTER ―</div>
   <div class="select-wrapper">
-    <!-- P1 preview -->
     <div class="preview-box">
       <div class="preview-label p1-lbl">1P</div>
       <img id="p1Prev" class="preview-img" src="" alt="">
       <div id="p1Name" class="preview-name" style="color:var(--accent)">???</div>
     </div>
-    <!-- Grid -->
     <div style="text-align:center;">
       <div class="char-grid" id="charGrid"></div>
-      <div class="select-hint">좌클릭 = P1 선택 &nbsp;|&nbsp; 우클릭 = P2 선택</div>
-      <!-- 조작키 안내 -->
+      <div class="select-hint">좌클릭 = 1P 선택 &nbsp;|&nbsp; 우클릭 = 2P 선택</div>
       <div class="key-panel">
         <h4>CONTROLS</h4>
         <div class="key-row">
           <div class="key-col">
-            <b style="color:#aaa;font-size:10px;">PLAYER 1</b>
+            <b>PLAYER 1</b>
             <span><kbd>A</kbd><kbd>D</kbd> 이동</span>
             <span><kbd>W</kbd> 점프</span>
             <span><kbd>S</kbd> 가드</span>
@@ -136,7 +108,7 @@
             <span><kbd>L</kbd> 스킬</span>
           </div>
           <div class="key-col">
-            <b style="color:#aaa;font-size:10px;">PLAYER 2</b>
+            <b>PLAYER 2</b>
             <span><kbd>←</kbd><kbd>→</kbd> 이동</span>
             <span><kbd>↑</kbd> 점프</span>
             <span><kbd>↓</kbd> 가드</span>
@@ -147,7 +119,6 @@
       </div>
       <button class="btn-start" id="btnStart" disabled onclick="startGame()">▶ START FIGHT</button>
     </div>
-    <!-- P2 preview -->
     <div class="preview-box">
       <div class="preview-label p2-lbl">2P</div>
       <img id="p2Prev" class="preview-img" src="" alt="">
@@ -173,165 +144,192 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════
-//  SPRITE SHEET DATA  (실제 파일 분석 기반)
+//  정밀 분석된 스프라이트 좌표 데이터
 // ═══════════════════════════════════════════════════════════
+
 /*
-  1-1.png : 832 x 1276  정장남 (한정한)
-    - 8열, 8행, 각 프레임 약 104x159
-    - R1(y=0):   IDLE  8프레임
-    - R2(y=1):   WALK  8프레임
-    - R3(y=2):   JUMP  7프레임
-    - R4(y=3):   GUARD 7프레임
-    - R5(y=4):   DASH  4프레임 (col 1~4, col0 비어있음)
-    - R6(y=5):   ATTACK(PRIMAL) 6프레임
-    - R7(y=6):   SKILL 5프레임
-    - R8(y=7):   HIT   6프레임
+  ┌─ 1-1.png (832×1276) 한정한 ───────────────────────────┐
+  │  열 x좌표: [68,163,260,354,449,545,640,735] (각 ~72px)│
+  │  행 y좌표:                                             │
+  │   R1 IDLE   y=49  h=146  8프레임 (col 0-7)            │
+  │   R2 WALK   y=219 h=140  8프레임 (col 0-7)            │
+  │   R3 JUMP   y=378 h=130  8프레임 (col 0-7)            │
+  │   R4 GUARD  y=539 h=132  7프레임 (col 0,1,2,3,5,6,7)  │
+  │   R5 DASH   y=688 h=95   3프레임 (col 2,4,5)          │
+  │   R6 ATTACK y=829 h=128  7프레임 (col 0-4,6,7)        │
+  │   R7 SKILL  y=986 h=138  5프레임 (col 0,1,2,4,5)      │
+  │   R8 HIT    y=1143 h=124 6프레임 (col 0,1,3,4,6,7)    │
+  └────────────────────────────────────────────────────────┘
 
-  2-1.png : 1376 x 768  망토남 (Toru R)
-    - 한 행에 최대 14칸, 6행
-    - R1(y=0): IDLE  col0-7(8프레임) + col8-13(6프레임, 같은 행 우측)
-    - R2(y=1): WALK  col0-7(8프레임) + col8-13(6프레임)
-    - R3(y=2): JUMP  col0-7(8프레임) | GUARD col8-13(6프레임) 같은행
-    - R6(y=3): ATTACK Normal Combo 13프레임 (col0-12)
-    - R7(y=4): SKILL Phantom Saber 12프레임 (col0-11)
-    - R8(y=5): HURT & DOWN 12프레임 (col0-11)
+  ┌─ 2-1.png (1376×768) Toru R ───────────────────────────┐
+  │  13개 셀 각 62px: [96,182,268,354,441,527,613,785,    │
+  │                     871,958,1044,1130,1216]             │
+  │  R1 IDLE     y=29  h=81  13프레임 (col 0-12)           │
+  │  R2 WALK     y=145 h=83  13프레임 (col 0-12)           │
+  │  R3 JUMP     y=273 h=95  7프레임 (col 0-6)             │
+  │  R3 GUARD    y=273 h=95  6프레임 (col 7-12)            │
+  │  R4 ATTACK   y=415 h=84  11프레임 (col 0-10)           │
+  │  R5 SKILL    y=548 h=86  6프레임 (col 0-3,6,7)         │
+  │  R6 HURT     y=675 h=86  8프레임 (col 0-2,5-7,10,11)  │
+  └────────────────────────────────────────────────────────┘
 
-  3-1.png : 1024 x 1024  검은티남 (Shadow)
-    - 4열 5행, 각 셀 256x204, 셀 하나에 프레임 1개
-    - R1(y=0): [IDLE col0] [WALK col1] [JUMP col2] [IDLE2 col3]
-    - R2(y=1): [IDLE3 col0] [JUMP2 col1] [JUMP3 col2] [GUARD col3]
-    - R3(y=2) 라벨R4: [GUARD col0] [GUARD/ATK col1] [ATTACK col2] [ATTACK2 col3]
-    - R4(y=3) 라벨R5: [SKILL1 col0] [SKILL2 col1] [SKILL3 col2] [SKILL4/DOWN col3]
-    - R5(y=4) 라벨R5: [VICTORY col0] [DOWN col1] [NEXT col2] [-col3]
-    -> IDLE: row0 col0, col3 + row1 col0 (3프레임 루프)
-    -> WALK: row0 col1 (1프레임 - 걷기용 반복)
-    -> JUMP: row0 col2, row1 col1, row1 col2 (3프레임)
-    -> GUARD: row1 col3, row2 col0 (2프레임)
-    -> ATTACK: row2 col1, col2, col3 (3프레임)
-    -> SKILL: row3 col0~col3 (4프레임)
-    -> HIT/DOWN: row3 col3, row4 col1 (2프레임)
+  ┌─ 3-1.png (1024×1024) Shadow ──────────────────────────┐
+  │  4열 5행 균등: 각 셀 256×204                           │
+  │  [row,col] 매핑:                                       │
+  │  IDLE:   [0,0][0,3][1,0]  3프레임                      │
+  │  WALK:   [0,1]             1프레임(루프)               │
+  │  JUMP:   [0,2][1,1][1,2]  3프레임                      │
+  │  GUARD:  [1,3][2,0]       2프레임                      │
+  │  ATTACK: [2,1][2,2][2,3]  3프레임                      │
+  │  SKILL:  [3,0][3,1][3,2][3,3] 4프레임                  │
+  │  HIT:    [4,1]             1프레임                     │
+  └────────────────────────────────────────────────────────┘
 
-  4-1.png : 1024 x 1024  교복녀
-    - 8열 5행, 각 프레임 128x204
-    - R1(y=0): IDLE col0-3(4프레임) + WALK col4-7(4프레임) 같은행
-    - R2(y=1): JUMP col0-3(4프레임) + DASH col4-7(4프레임) 같은행
-    - R3(y=2): NORMAL ATTACK 8프레임 (col0-7)
-    - R4(y=3): SKILL ATTACK   8프레임 (col0-7)
-    - R5(y=4): HURT col0-3(4프레임) + HIT col4-7(4프레임) 같은행
+  ┌─ 4-1.png (1024×1024) 교복녀 ──────────────────────────┐
+  │  8열: [62,169,278,387,555,651,760,867] (각 ~107px)    │
+  │  R1 y=55  h=145: col0-3=IDLE(4f) col4-7=WALK(4f)      │
+  │  R2 y=250 h=153: col0-3=JUMP(4f) col4-7=DASH(4f)      │
+  │  R3 y=461 h=145: col0-7=ATTACK(8f)                    │
+  │  R4 y=666 h=144: col0-7=SKILL(8f)                     │
+  │  R5 y=869 h=144: col0-3=HURT(4f)  col4-7=HIT(4f)      │
+  └────────────────────────────────────────────────────────┘
 */
 
-const CHARS = [
-  {
-    id:1, name:'한정한', file:'1.jpg', sheet:'1-1.png', color:'#3a6fff',
-    sheetW:832, sheetH:1276,
-    frameW:104, frameH:159,
-    cols:8,
-    // row index (0-based), 시작col, 프레임수
-    anims:{
-      idle:  {row:0, col:0, frames:8, fps:8},
-      walk:  {row:1, col:0, frames:8, fps:10},
-      jump:  {row:2, col:0, frames:7, fps:10},
-      guard: {row:3, col:0, frames:7, fps:8},
-      dash:  {row:4, col:1, frames:4, fps:12},
-      attack:{row:5, col:0, frames:6, fps:14, dmg:12},
-      skill: {row:6, col:0, frames:5, fps:11, dmg:26},
-      hit:   {row:7, col:0, frames:6, fps:10},
-    },
-    stats:{hp:100, speed:3.5, jumpV:-13, skillCD:3.5}
+// 정밀 프레임 좌표 (실측값)
+const SPRITE_DATA = {
+  // 1-1.png: col x좌표 배열, row y+h 배열
+  1: {
+    cols: [68,163,260,354,449,545,640,735],
+    colW: [73,71,70,73,71,71,73,71],
+    rows: {
+      idle:   {y:49,  h:146, ci:[0,1,2,3,4,5,6,7]},
+      walk:   {y:219, h:140, ci:[0,1,2,3,4,5,6,7]},
+      jump:   {y:378, h:130, ci:[0,1,2,3,4,5,6,7]},
+      guard:  {y:539, h:132, ci:[0,1,2,3,5,6,7]},
+      dash:   {y:688, h:95,  ci:[2,4,5]},
+      attack: {y:829, h:128, ci:[0,1,2,3,4,6,7], dmg:12},
+      skill:  {y:986, h:138, ci:[0,1,2,4,5],     dmg:26},
+      hit:    {y:1143,h:124, ci:[0,1,3,4,6,7]},
+    }
   },
-  {
-    id:2, name:'Toru R', file:'2.jpg', sheet:'2-1.png', color:'#9a5fff',
-    sheetW:1376, sheetH:768,
-    frameW:92, frameH:128,
-    cols:14, // 최대 열수 (한 행에 14칸)
-    anims:{
-      // IDLE: 행0 col0-7 (8프레임) -> 게임에선 앞 6만 사용
-      idle:  {row:0, col:0, frames:8, fps:8},
-      // WALK: 행1 col0-7
-      walk:  {row:1, col:0, frames:8, fps:10},
-      // JUMP: 행2 col0-7
-      jump:  {row:2, col:0, frames:8, fps:10},
-      // GUARD: 행2 col8-13 (같은 행 우측)
-      guard: {row:2, col:8, frames:6, fps:8},
-      // DASH: WALK 빠르게
-      dash:  {row:1, col:0, frames:8, fps:16},
-      // ATTACK: 행3 col0-12 (13프레임)
-      attack:{row:3, col:0, frames:13, fps:14, dmg:15},
-      // SKILL(Phantom Saber): 행4 col0-11 (12프레임)
-      skill: {row:4, col:0, frames:12, fps:12, dmg:32},
-      // HURT: 행5 col0-11
-      hit:   {row:5, col:0, frames:12, fps:10},
-    },
-    stats:{hp:90, speed:3.2, jumpV:-12, skillCD:4.0}
+  // 2-1.png: 13개 셀
+  2: {
+    cols: [96,182,268,354,441,527,613,785,871,958,1044,1130,1216],
+    colW: Array(13).fill(62),
+    rows: {
+      idle:   {y:29,  h:81, ci:[0,1,2,3,4,5,6,7,8,9,10,11,12]},
+      walk:   {y:145, h:83, ci:[0,1,2,3,4,5,6,7,8,9,10,11,12]},
+      jump:   {y:273, h:95, ci:[0,1,2,3,4,5,6]},
+      guard:  {y:273, h:95, ci:[7,8,9,10,11,12]},
+      dash:   {y:145, h:83, ci:[0,1,2,3,4,5,6,7,8,9,10,11,12]}, // WALK 빠르게
+      attack: {y:415, h:84, ci:[0,1,2,3,4,5,6,7,8,9,10], dmg:15},
+      skill:  {y:548, h:86, ci:[0,1,2,3,6,7],             dmg:32},
+      hit:    {y:675, h:86, ci:[0,1,2,5,6,7,10,11]},
+    }
   },
-  {
-    id:3, name:'Shadow', file:'3.jpg', sheet:'3-1.png', color:'#ff6a3a',
-    sheetW:1024, sheetH:1024,
-    frameW:256, frameH:204,
-    cols:4,
-    // 각 셀 = 1프레임, row*cols+col 으로 절대 인덱스 지정
-    // 커스텀 anims: frames 배열로 절대인덱스 지정
-    anims:{
-      idle:  {absFrames:[0,3,4], fps:6},       // row0col0, row1col0, (row0col3도 비슷)
-      walk:  {absFrames:[1,0,1,4], fps:10},    // row0col1
-      jump:  {absFrames:[2,5,6], fps:10},      // row0col2, row1col1, row1col2
-      guard: {absFrames:[7,8], fps:8},         // row1col3, row2col0
-      dash:  {absFrames:[1,0,4,0], fps:14},
-      attack:{absFrames:[9,10,11], fps:14, dmg:18},  // row2col1,2,3
-      skill: {absFrames:[12,13,14,15], fps:11, dmg:36}, // row3col0~3
-      hit:   {absFrames:[15,17], fps:10},      // row3col3, row4col1
-    },
-    stats:{hp:85, speed:4.2, jumpV:-14, skillCD:4.5}
+  // 3-1.png: 각 프레임 = [row*4+col] 절대 인덱스 (셀 256×204)
+  3: {
+    // absIdx: row*4+col
+    cellW:256, cellH:204, gridCols:4,
+    anims: {
+      idle:   {absIdx:[0,15,4],   fps:5,  dmg:0},   // [0,0][3,3][1,0]
+      walk:   {absIdx:[1,0,1,4],  fps:10, dmg:0},
+      jump:   {absIdx:[2,5,6],    fps:10, dmg:0},
+      guard:  {absIdx:[7,8],      fps:8,  dmg:0},
+      dash:   {absIdx:[1,0,5],    fps:14, dmg:0},
+      attack: {absIdx:[9,10,11],  fps:14, dmg:18},
+      skill:  {absIdx:[12,13,14,15], fps:11, dmg:36},
+      hit:    {absIdx:[17],       fps:8,  dmg:0},
+    }
   },
-  {
-    id:4, name:'교복녀', file:'4.jpg', sheet:'4-1.png', color:'#ff3a6e',
-    sheetW:1024, sheetH:1024,
-    frameW:128, frameH:204,
-    cols:8,
-    anims:{
-      // R1 좌절반(col0-3) = IDLE
-      idle:  {row:0, col:0, frames:4, fps:8},
-      // R1 우절반(col4-7) = WALK
-      walk:  {row:0, col:4, frames:4, fps:10},
-      // R2 좌절반(col0-3) = JUMP
-      jump:  {row:1, col:0, frames:4, fps:10},
-      // R2 우절반(col4-7) = DASH
-      guard: {row:1, col:4, frames:4, fps:8},   // DASH를 가드로 임시 사용
-      dash:  {row:1, col:4, frames:4, fps:14},
-      // R3 전체 = NORMAL ATTACK
-      attack:{row:2, col:0, frames:8, fps:14, dmg:11},
-      // R4 전체 = SKILL ATTACK
-      skill: {row:3, col:0, frames:8, fps:12, dmg:28},
-      // R5 좌절반 = HURT, 우절반 = HIT(넘어짐)
-      hit:   {row:4, col:0, frames:4, fps:10},
-    },
-    stats:{hp:95, speed:3.8, jumpV:-13, skillCD:3.0}
+  // 4-1.png: 8열 x좌표, 5행
+  4: {
+    cols: [62,169,278,387,555,651,760,867],
+    colW: [107,109,109,100,96,109,107,105],
+    rows: {
+      idle:   {y:55,  h:145, ci:[0,1,2,3]},
+      walk:   {y:55,  h:145, ci:[4,5,6,7]},
+      jump:   {y:250, h:153, ci:[0,1,2,3]},
+      guard:  {y:250, h:153, ci:[4,5,6,7]},
+      dash:   {y:250, h:153, ci:[4,5,6,7]},
+      attack: {y:461, h:145, ci:[0,1,2,3,4,5,6,7], dmg:11},
+      skill:  {y:666, h:144, ci:[0,1,2,3,4,5,6,7], dmg:28},
+      hit:    {y:869, h:144, ci:[0,1,2,3]},
+    }
   }
+};
+
+// ── 캐릭터 정보 ──
+const CHARS = [
+  {id:1, name:'한정한', file:'1.jpg', sheet:'1-1.png', color:'#3a6fff',
+   stats:{hp:100, speed:3.5, jumpV:-13, skillCD:3.5},
+   fps:{idle:8, walk:10, jump:10, guard:8, dash:14, attack:14, skill:11, hit:10}},
+  {id:2, name:'Toru R',  file:'2.jpg', sheet:'2-1.png', color:'#9a5fff',
+   stats:{hp:90,  speed:3.2, jumpV:-12, skillCD:4.0},
+   fps:{idle:7, walk:10, jump:10, guard:8, dash:16, attack:13, skill:11, hit:9}},
+  {id:3, name:'Shadow',  file:'3.jpg', sheet:'3-1.png', color:'#ff6a3a',
+   stats:{hp:85,  speed:4.2, jumpV:-14, skillCD:4.5},
+   fps:{}},
+  {id:4, name:'교복녀',  file:'4.jpg', sheet:'4-1.png', color:'#ff3a6e',
+   stats:{hp:95,  speed:3.8, jumpV:-13, skillCD:3.0},
+   fps:{idle:8, walk:10, jump:10, guard:8, dash:14, attack:13, skill:11, hit:10}}
 ];
 
-// ═══════════════════════════════════════════════════════════
-//  GLOBAL STATE
-// ═══════════════════════════════════════════════════════════
-const W=800, H=450, GROUND=H-90;
-const GRAVITY=0.6;
-let p1Sel=null, p2Sel=null;
-let sprites={};
-let canvas, ctx, rafId, lastTime;
-let fighters=[], hitFX=[];
-let gameOver=false, keys={};
-
-// ── Stars ──
-(()=>{
-  const c=document.getElementById('stars');
-  for(let i=0;i<120;i++){
-    const s=document.createElement('div'), sz=Math.random()*2+1;
-    s.className='star';
-    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*4}s;--del:${-Math.random()*4}s;`;
-    c.appendChild(s);
+// ── 스프라이트 프레임 SX/SY 반환 ──
+function getFrameSXY(charId, state, frameIdx) {
+  const sd = SPRITE_DATA[charId];
+  if (charId === 3) {
+    // 절대 인덱스 방식
+    const anim = sd.anims[state] || sd.anims.idle;
+    const absIdx = anim.absIdx[frameIdx % anim.absIdx.length];
+    const col = absIdx % sd.gridCols;
+    const row = Math.floor(absIdx / sd.gridCols);
+    return {sx: col * sd.cellW, sy: row * sd.cellH, fw: sd.cellW, fh: sd.cellH};
+  } else {
+    const row = sd.rows[state] || sd.rows.idle;
+    const ciIdx = frameIdx % row.ci.length;
+    const col = row.ci[ciIdx];
+    const sx = sd.cols[col];
+    const fw = sd.colW[col];
+    return {sx, sy: row.y, fw, fh: row.h};
   }
-})();
+}
 
-// ── Screen control ──
+function getAnimFrameCount(charId, state) {
+  const sd = SPRITE_DATA[charId];
+  if (charId === 3) {
+    const anim = sd.anims[state] || sd.anims.idle;
+    return anim.absIdx.length;
+  } else {
+    const row = sd.rows[state] || sd.rows.idle;
+    return row.ci.length;
+  }
+}
+
+function getAnimDmg(charId, state) {
+  const sd = SPRITE_DATA[charId];
+  if (charId === 3) return (sd.anims[state]||{dmg:0}).dmg || 0;
+  return (sd.rows[state]||{dmg:0}).dmg || 0;
+}
+
+function getAnimFPS(charData, state) {
+  if (charData.id === 3) {
+    return (SPRITE_DATA[3].anims[state]||{fps:8}).fps;
+  }
+  return charData.fps[state] || 8;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UI
+// ═══════════════════════════════════════════════════════════
+const W=800, H=450, GROUND=H-90, GRAVITY=0.6;
+let p1Sel=null, p2Sel=null, sprites={};
+let canvas, ctx, rafId, lastTime;
+let fighters=[], hitFX=[], gameOver=false, keys={}, gameTime=99;
+
+// Stars
+(()=>{const c=document.getElementById('stars');for(let i=0;i<120;i++){const s=document.createElement('div'),sz=Math.random()*2+1;s.className='star';s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*4}s;--del:${-Math.random()*4}s;`;c.appendChild(s);}})();
+
 function showTitle(){
   p1Sel=p2Sel=null; stopGame();
   document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
@@ -348,27 +346,19 @@ function stopGame(){
   document.removeEventListener('keydown',onKey);
   document.removeEventListener('keyup',offKey);
 }
-
-// ── Character select ──
 function buildGrid(){
-  const g=document.getElementById('charGrid'); g.innerHTML='';
+  const g=document.getElementById('charGrid');g.innerHTML='';
   CHARS.forEach((ch,i)=>{
-    const card=document.createElement('div');
-    card.className='char-card'; card.id='c'+i;
-    card.innerHTML=`<img src="${ch.file}" alt="${ch.name}" style="width:100%;height:100%;object-fit:cover;object-position:top">
-                    <div class="char-label">${ch.name}</div>`;
+    const card=document.createElement('div');card.className='char-card';
+    card.innerHTML=`<img src="${ch.file}" alt="${ch.name}" style="width:100%;height:100%;object-fit:cover;object-position:top"><div class="char-label">${ch.name}</div>`;
     card.addEventListener('click',()=>pick(i,1));
     card.addEventListener('contextmenu',e=>{e.preventDefault();pick(i,2);});
     g.appendChild(card);
   });
 }
-function pick(idx,pl){
-  if(pl===1) p1Sel=idx; else p2Sel=idx;
-  updatePrev();
-}
+function pick(idx,pl){if(pl===1)p1Sel=idx;else p2Sel=idx;updatePrev();}
 function updatePrev(){
-  const p1=p1Sel!==null?CHARS[p1Sel]:null;
-  const p2=p2Sel!==null?CHARS[p2Sel]:null;
+  const p1=p1Sel!==null?CHARS[p1Sel]:null,p2=p2Sel!==null?CHARS[p2Sel]:null;
   document.getElementById('p1Prev').src=p1?p1.file:'';
   document.getElementById('p1Name').textContent=p1?p1.name:'???';
   document.getElementById('p2Prev').src=p2?p2.file:'';
@@ -381,61 +371,34 @@ function updatePrev(){
   });
   document.getElementById('btnStart').disabled=(p1Sel===null||p2Sel===null);
 }
-
-// ── Sprite loader ──
 function loadSprite(ch){
   return new Promise(res=>{
     if(sprites[ch.id]){res();return;}
-    const img=new Image();
-    img.onload=()=>{sprites[ch.id]=img;res();};
-    img.onerror=()=>{sprites[ch.id]=null;res();};
-    img.src=ch.sheet;
+    const img=new Image();img.onload=()=>{sprites[ch.id]=img;res();};img.onerror=()=>{sprites[ch.id]=null;res();};img.src=ch.sheet;
   });
 }
 
 // ═══════════════════════════════════════════════════════════
-//  FIGHTER CLASS
+//  FIGHTER
 // ═══════════════════════════════════════════════════════════
 class Fighter {
   constructor(ch, x, facing, isP1){
     this.ch=ch; this.x=x; this.y=GROUND;
-    this.vx=0; this.vy=0;
-    this.facing=facing; this.isP1=isP1;
+    this.vx=0; this.vy=0; this.facing=facing; this.isP1=isP1;
     this.hp=ch.stats.hp; this.maxHp=ch.stats.hp;
-    this.state='idle';
-    this.frame=0; this.frameTick=0;
-    this.onGround=true;
-    this.hitCD=0; this.skillCD=0;
-    this.dead=false;
-    this.w=44; this.h=80;
-    this.hitFlash=0;
-    this.combo=0; this.comboT=0;
-    this.atkBox=null;
-    this.scale=1.8; // 렌더 스케일
+    this.state='idle'; this.frame=0; this.frameTick=0;
+    this.onGround=true; this.hitCD=0; this.skillCD=0;
+    this.dead=false; this.w=40; this.h=80;
+    this.hitFlash=0; this.combo=0; this.comboT=0; this.atkBox=null;
   }
 
-  get anim(){ return this.ch.anims[this.state]||this.ch.anims.idle; }
+  get totalFrames(){ return getAnimFrameCount(this.ch.id, this.state); }
+  get fps(){ return getAnimFPS(this.ch, this.state); }
 
   setState(s){
     if(this.state===s) return;
-    const lock=['attack','skill','hit'];
-    if(lock.includes(this.state)&&lock.includes(s)) return;
+    if(['attack','skill','hit'].includes(this.state)&&['attack','skill','hit'].includes(s)) return;
     this.state=s; this.frame=0; this.frameTick=0; this.atkBox=null;
-  }
-
-  // 프레임의 실제 sx, sy 반환
-  getFrameXY(anim, frame){
-    const ch=this.ch;
-    if(anim.absFrames){
-      const absIdx=anim.absFrames[Math.min(frame, anim.absFrames.length-1)];
-      const col=absIdx%ch.cols;
-      const row=Math.floor(absIdx/ch.cols);
-      return {sx:col*ch.frameW, sy:row*ch.frameH};
-    } else {
-      const col=(anim.col||0)+frame;
-      const row=anim.row||0;
-      return {sx:col*ch.frameW, sy:row*ch.frameH};
-    }
   }
 
   update(dt, enemy){
@@ -446,12 +409,10 @@ class Fighter {
     this.comboT=Math.max(0,this.comboT-dt);
     if(this.comboT<=0) this.combo=0;
 
-    // 적 방향 자동 페이싱
     if(!['attack','skill','hit'].includes(this.state)){
       this.facing=enemy.x>this.x?1:-1;
     }
 
-    // 입력
     if(!['attack','skill','hit'].includes(this.state)){
       const L=keys[this.isP1?'a':'ArrowLeft'];
       const R=keys[this.isP1?'d':'ArrowRight'];
@@ -460,10 +421,10 @@ class Fighter {
       const A=keys[this.isP1?'j':'u'];
       const S=keys[this.isP1?'l':'o'];
 
-      if(S&&this.skillCD<=0){ this.setState('skill'); this.skillCD=this.ch.stats.skillCD; }
-      else if(A){ this.setState('attack'); }
-      else if(G){ this.setState('guard'); this.vx=0; }
-      else if(U&&this.onGround){ this.vy=this.ch.stats.jumpV; this.onGround=false; this.setState('jump'); }
+      if(S&&this.skillCD<=0){this.setState('skill');this.skillCD=this.ch.stats.skillCD;}
+      else if(A){this.setState('attack');}
+      else if(G){this.setState('guard');this.vx=0;}
+      else if(U&&this.onGround){this.vy=this.ch.stats.jumpV;this.onGround=false;this.setState('jump');}
       else if(L||R){
         this.vx=(L?-1:1)*this.ch.stats.speed;
         if(this.onGround) this.setState('walk');
@@ -473,21 +434,18 @@ class Fighter {
       }
     }
 
-    // 물리
     if(!this.onGround) this.vy+=GRAVITY;
     this.x+=this.vx; this.y+=this.vy;
-    if(this.y>=GROUND){ this.y=GROUND; this.vy=0;
-      if(!this.onGround){this.onGround=true; if(this.state==='jump') this.setState('idle');}
-    } else { this.onGround=false; }
+    if(this.y>=GROUND){
+      this.y=GROUND;this.vy=0;
+      if(!this.onGround){this.onGround=true;if(this.state==='jump')this.setState('idle');}
+    } else {this.onGround=false;}
     this.x=Math.max(36,Math.min(W-36,this.x));
 
-    // 애니메이션
-    const anim=this.anim;
-    const totalF=anim.absFrames?anim.absFrames.length:anim.frames;
-    this.frameTick+=dt*anim.fps;
+    this.frameTick+=dt*this.fps;
     if(this.frameTick>=1){
       this.frameTick-=1; this.frame++;
-      if(this.frame>=totalF){
+      if(this.frame>=this.totalFrames){
         this.frame=0;
         if(['attack','skill'].includes(this.state)){this.setState('idle');this.atkBox=null;}
         else if(this.state==='hit') this.setState('idle');
@@ -496,59 +454,57 @@ class Fighter {
 
     // 히트박스
     if(['attack','skill'].includes(this.state)&&this.frame>=1&&this.frame<=4){
-      const reach=this.state==='skill'?150:85;
-      this.atkBox={x:this.x+this.facing*20, y:this.y-this.h, w:reach*this.facing, h:65};
+      const reach=this.state==='skill'?150:90;
+      this.atkBox={x:this.x+this.facing*20,y:this.y-this.h,w:reach*this.facing,h:70};
       if(this.hitCD<=0&&!enemy.dead){
         const ab=this.atkBox;
-        const ax1=Math.min(ab.x,ab.x+ab.w), ax2=Math.max(ab.x,ab.x+ab.w);
-        const ex1=enemy.x-enemy.w/2, ex2=enemy.x+enemy.w/2;
-        const ey1=enemy.y-enemy.h, ey2=enemy.y;
+        const ax1=Math.min(ab.x,ab.x+ab.w),ax2=Math.max(ab.x,ab.x+ab.w);
+        const ex1=enemy.x-enemy.w/2,ex2=enemy.x+enemy.w/2;
+        const ey1=enemy.y-enemy.h,ey2=enemy.y;
         if(ax2>ex1&&ax1<ex2&&ab.y<ey2&&ab.y+ab.h>ey1){
-          let dmg=anim.dmg||10;
+          let dmg=getAnimDmg(this.ch.id,this.state)||10;
           if(enemy.state==='guard') dmg=Math.floor(dmg*0.15);
           enemy.takeHit(dmg);
-          this.hitCD=0.45;
-          this.combo++; this.comboT=1.8;
-          // 히트이펙트
-          hitFX.push({x:enemy.x, y:enemy.y-enemy.h/2, life:0.3, maxLife:0.3, type:this.state});
+          this.hitCD=0.45; this.combo++; this.comboT=1.8;
+          hitFX.push({x:enemy.x,y:enemy.y-enemy.h/2,life:0.3,maxLife:0.3,type:this.state});
         }
       }
-    } else { this.atkBox=null; }
+    } else {this.atkBox=null;}
   }
 
   takeHit(dmg){
     this.hp=Math.max(0,this.hp-dmg);
-    this.hitFlash=0.18;
+    this.hitFlash=0.2;
     if(this.state!=='guard') this.setState('hit');
-    if(this.hp<=0){ this.dead=true; this.state='hit'; }
+    if(this.hp<=0){this.dead=true;this.state='hit';}
   }
 
   draw(ctx){
     const img=sprites[this.ch.id];
-    const anim=this.anim;
-    const fw=this.ch.frameW, fh=this.ch.frameH;
-    const sc=this.scale;
+    const {sx,sy,fw,fh}=getFrameSXY(this.ch.id,this.state,this.frame);
+
+    // 렌더 스케일: 게임 캐릭터 높이 ~140px 기준
+    const targetH=140;
+    const sc=targetH/fh;
     const dw=fw*sc, dh=fh*sc;
-    const {sx,sy}=this.getFrameXY(anim, this.frame);
+    const dy=this.y-dh;
 
     ctx.save();
-    if(this.hitFlash>0){ ctx.globalAlpha=0.75; ctx.filter='brightness(3) saturate(0.1)'; }
-
+    if(this.hitFlash>0){ctx.globalAlpha=0.72;ctx.filter='brightness(3) saturate(0.05)';}
     if(img){
       if(this.facing===-1){
-        ctx.translate(this.x,0); ctx.scale(-1,1);
-        ctx.drawImage(img, sx,sy, fw,fh, -dw/2, this.y-dh, dw,dh);
+        ctx.translate(this.x,0);ctx.scale(-1,1);
+        ctx.drawImage(img,sx,sy,fw,fh,-dw/2,dy,dw,dh);
       } else {
-        ctx.drawImage(img, sx,sy, fw,fh, this.x-dw/2, this.y-dh, dw,dh);
+        ctx.drawImage(img,sx,sy,fw,fh,this.x-dw/2,dy,dw,dh);
       }
     } else {
-      // 폴백 블록
-      ctx.fillStyle=this.ch.color;
-      ctx.globalAlpha=0.8;
-      ctx.fillRect(this.x-this.w/2, this.y-this.h, this.w, this.h);
-      ctx.fillStyle='#fff'; ctx.globalAlpha=1;
-      ctx.font='bold 10px Rajdhani'; ctx.textAlign='center';
-      ctx.fillText(this.ch.name, this.x, this.y-this.h/2);
+      // 폴백
+      ctx.fillStyle=this.ch.color;ctx.globalAlpha=0.85;
+      ctx.fillRect(this.x-this.w/2,this.y-this.h,this.w,this.h);
+      ctx.fillStyle='#fff';ctx.globalAlpha=1;
+      ctx.font='bold 10px Rajdhani';ctx.textAlign='center';
+      ctx.fillText(this.ch.name,this.x,this.y-this.h/2);
     }
     ctx.restore();
   }
@@ -557,77 +513,63 @@ class Fighter {
 // ═══════════════════════════════════════════════════════════
 //  GAME LOOP
 // ═══════════════════════════════════════════════════════════
-let gameTime=99;
-
 async function startGame(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
   document.getElementById('gameScreen').classList.remove('hidden');
   canvas=document.getElementById('gameCanvas');
-  canvas.width=W; canvas.height=H;
+  canvas.width=W;canvas.height=H;
   ctx=canvas.getContext('2d');
 
-  await Promise.all([loadSprite(CHARS[p1Sel]), loadSprite(CHARS[p2Sel])]);
+  await Promise.all([loadSprite(CHARS[p1Sel]),loadSprite(CHARS[p2Sel])]);
 
   fighters=[
-    new Fighter(CHARS[p1Sel], 180, 1, true),
-    new Fighter(CHARS[p2Sel], W-180, -1, false)
+    new Fighter(CHARS[p1Sel],180,1,true),
+    new Fighter(CHARS[p2Sel],W-180,-1,false)
   ];
-  hitFX=[]; gameTime=99; gameOver=false; keys={};
+  hitFX=[];gameTime=99;gameOver=false;keys={};
   document.addEventListener('keydown',onKey);
   document.addEventListener('keyup',offKey);
   lastTime=performance.now();
   rafId=requestAnimationFrame(loop);
 }
-
-function onKey(e){ keys[e.key]=true; e.preventDefault(); }
-function offKey(e){ keys[e.key]=false; }
+function onKey(e){keys[e.key]=true;e.preventDefault();}
+function offKey(e){keys[e.key]=false;}
 
 function loop(now){
   const dt=Math.min((now-lastTime)/1000,0.05);
   lastTime=now;
-
   if(!gameOver){
     gameTime-=dt;
-    if(gameTime<=0){gameTime=0; endGame(); return;}
-    fighters[0].update(dt, fighters[1]);
-    fighters[1].update(dt, fighters[0]);
-    // 충돌 밀기
+    if(gameTime<=0){gameTime=0;endGame();return;}
+    fighters[0].update(dt,fighters[1]);
+    fighters[1].update(dt,fighters[0]);
     const ov=(fighters[0].x+26)-(fighters[1].x-26);
-    if(ov>0){fighters[0].x-=ov/2; fighters[1].x+=ov/2;}
+    if(ov>0){fighters[0].x-=ov/2;fighters[1].x+=ov/2;}
     hitFX=hitFX.filter(e=>{e.life-=dt;return e.life>0;});
     if(fighters[0].dead||fighters[1].dead){endGame();return;}
   }
-
   drawGame();
   rafId=requestAnimationFrame(loop);
 }
 
 function drawGame(){
-  // 배경
   const bg=ctx.createLinearGradient(0,0,0,H);
-  bg.addColorStop(0,'#1a0e2e'); bg.addColorStop(0.65,'#0d0820'); bg.addColorStop(1,'#050310');
-  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  bg.addColorStop(0,'#1a0e2e');bg.addColorStop(0.65,'#0d0820');bg.addColorStop(1,'#050310');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
 
-  // 바닥
   const fl=ctx.createLinearGradient(0,GROUND-8,0,H);
-  fl.addColorStop(0,'#2a1a0a'); fl.addColorStop(1,'#0c0704');
-  ctx.fillStyle=fl; ctx.fillRect(0,GROUND-8,W,H-GROUND+8);
-  ctx.strokeStyle='#5a3a18'; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(0,GROUND-8); ctx.lineTo(W,GROUND-8); ctx.stroke();
+  fl.addColorStop(0,'#2a1a0a');fl.addColorStop(1,'#0c0704');
+  ctx.fillStyle=fl;ctx.fillRect(0,GROUND-8,W,H-GROUND+8);
+  ctx.strokeStyle='#5a3a18';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,GROUND-8);ctx.lineTo(W,GROUND-8);ctx.stroke();
 
-  // 관중 (점들)
-  ctx.fillStyle='rgba(255,200,120,0.05)';
-  for(let i=0;i<50;i++){
-    ctx.beginPath();
-    ctx.arc(10+i*16,(i%3)*8+18,5,0,Math.PI*2);
-    ctx.fill();
-  }
+  // 관중
+  ctx.fillStyle='rgba(255,200,120,0.04)';
+  for(let i=0;i<50;i++){ctx.beginPath();ctx.arc(10+i*16,(i%3)*8+18,5,0,Math.PI*2);ctx.fill();}
 
   // 중앙선
-  ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
-  ctx.setLineDash([4,8]);
-  ctx.beginPath(); ctx.moveTo(W/2,GROUND-8); ctx.lineTo(W/2,H); ctx.stroke();
-  ctx.setLineDash([]);
+  ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;ctx.setLineDash([4,8]);
+  ctx.beginPath();ctx.moveTo(W/2,GROUND-8);ctx.lineTo(W/2,H);ctx.stroke();ctx.setLineDash([]);
 
   // 히트이펙트
   hitFX.forEach(e=>{
@@ -636,118 +578,98 @@ function drawGame(){
     const al=e.life/e.maxLife;
     const col=e.type==='skill'?'80,150,255':'255,160,60';
     const g=ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,r);
-    g.addColorStop(0,`rgba(${col},${al})`);
-    g.addColorStop(1,`rgba(${col},0)`);
-    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(e.x,e.y,r,0,Math.PI*2); ctx.fill();
+    g.addColorStop(0,`rgba(${col},${al})`);g.addColorStop(1,`rgba(${col},0)`);
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(e.x,e.y,r,0,Math.PI*2);ctx.fill();
   });
 
-  // 캐릭터
   fighters.forEach(f=>f.draw(ctx));
-
   drawHUD();
 }
 
-// ── HUD 포함 조작키 안내 ──
 function drawHUD(){
   const [p1,p2]=fighters;
-  const pad=14, bW=265, bH=16;
+  const pad=14,bW=260,bH=15;
 
-  // === HP 바 ===
-  function hpBar(f, bx, rightAlign){
+  function hpBar(f,bx,rtl){
     const ratio=f.hp/f.maxHp;
     const col=ratio>0.5?'#2ecc40':ratio>0.25?'#ffdc00':'#ff4136';
-    ctx.fillStyle='rgba(0,0,0,0.65)';
-    ctx.fillRect(bx-2,pad-2,bW+4,bH+4);
-    ctx.fillStyle='#1a0000';
-    ctx.fillRect(bx,pad,bW,bH);
-    if(rightAlign){
-      const fw=bW*ratio;
-      ctx.fillStyle=col;
-      ctx.fillRect(bx+bW-fw,pad,fw,bH);
-    } else {
-      ctx.fillStyle=col;
-      ctx.fillRect(bx,pad,bW*ratio,bH);
-    }
-    ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1;
-    ctx.strokeRect(bx,pad,bW,bH);
+    ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(bx-2,pad-2,bW+4,bH+4);
+    ctx.fillStyle='#1a0000';ctx.fillRect(bx,pad,bW,bH);
+    const fw=bW*ratio;
+    ctx.fillStyle=col;
+    if(rtl) ctx.fillRect(bx+bW-fw,pad,fw,bH);
+    else ctx.fillRect(bx,pad,fw,bH);
+    ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;ctx.strokeRect(bx,pad,bW,bH);
   }
-  hpBar(p1, pad, false);
-  hpBar(p2, W-pad-bW, true);
+  hpBar(p1,pad,false);
+  hpBar(p2,W-pad-bW,true);
 
-  // 이름
-  ctx.font='bold 12px Rajdhani';
-  ctx.textAlign='left'; ctx.fillStyle=CHARS[p1Sel].color;
-  ctx.fillText(`1P ${CHARS[p1Sel].name}`, pad, pad+bH+14);
-  ctx.textAlign='right'; ctx.fillStyle=CHARS[p2Sel].color;
-  ctx.fillText(`${CHARS[p2Sel].name} 2P`, W-pad, pad+bH+14);
+  ctx.font='bold 11px Rajdhani';
+  ctx.textAlign='left';ctx.fillStyle=CHARS[p1Sel].color;
+  ctx.fillText(`1P ${CHARS[p1Sel].name}`,pad,pad+bH+13);
+  ctx.textAlign='right';ctx.fillStyle=CHARS[p2Sel].color;
+  ctx.fillText(`${CHARS[p2Sel].name} 2P`,W-pad,pad+bH+13);
 
-  // HP 숫자
-  ctx.font='bold 11px Orbitron';
-  ctx.textAlign='left'; ctx.fillStyle='rgba(255,255,255,0.7)';
-  ctx.fillText(Math.ceil(p1.hp), pad+4, pad+bH-2);
+  ctx.font='bold 10px Orbitron';
+  ctx.textAlign='left';ctx.fillStyle='rgba(255,255,255,0.6)';
+  ctx.fillText(Math.ceil(p1.hp),pad+4,pad+bH-2);
   ctx.textAlign='right';
-  ctx.fillText(Math.ceil(p2.hp), W-pad-4, pad+bH-2);
+  ctx.fillText(Math.ceil(p2.hp),W-pad-4,pad+bH-2);
 
-  // 타이머
-  ctx.font='bold 26px Orbitron'; ctx.textAlign='center';
+  ctx.font='bold 26px Orbitron';ctx.textAlign='center';
   ctx.fillStyle=gameTime<10?'#ff4136':'#ffd700';
-  ctx.fillText(Math.ceil(gameTime), W/2, 38);
+  ctx.fillText(Math.ceil(gameTime),W/2,38);
 
   // 스킬 쿨다운
-  const skW=70;
-  function skillBar(f, bx){
+  const skW=68;
+  function skillBar(f,bx){
     const r=Math.max(0,1-f.skillCD/f.ch.stats.skillCD);
-    ctx.fillStyle='rgba(0,0,0,0.5)';
-    ctx.fillRect(bx,pad+bH+18,skW,5);
-    ctx.fillStyle=r>=1?'#5a9fff':'#1a3060';
-    ctx.fillRect(bx,pad+bH+18,skW*r,5);
-    ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1;
-    ctx.strokeRect(bx,pad+bH+18,skW,5);
-    ctx.font='8px Rajdhani'; ctx.fillStyle='#556688';
-    ctx.textAlign='left';
-    ctx.fillText('SKILL', bx, pad+bH+16);
+    ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(bx,pad+bH+17,skW,5);
+    ctx.fillStyle=r>=1?'#5a9fff':'#1a3060';ctx.fillRect(bx,pad+bH+17,skW*r,5);
+    ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;ctx.strokeRect(bx,pad+bH+17,skW,5);
+    ctx.font='8px Rajdhani';ctx.fillStyle='#445566';ctx.textAlign='left';
+    ctx.fillText('SKILL',bx,pad+bH+15);
   }
-  skillBar(p1, pad);
-  skillBar(p2, W-pad-skW);
+  skillBar(p1,pad);
+  // P2 스킬바 (우측 정렬)
+  const r2=Math.max(0,1-p2.skillCD/p2.ch.stats.skillCD);
+  const bx2=W-pad-skW;
+  ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(bx2,pad+bH+17,skW,5);
+  const fw2=skW*r2;
+  ctx.fillStyle=r2>=1?'#ff5a7a':'#601030';ctx.fillRect(bx2+skW-fw2,pad+bH+17,fw2,5);
+  ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;ctx.strokeRect(bx2,pad+bH+17,skW,5);
+  ctx.font='8px Rajdhani';ctx.fillStyle='#554455';ctx.textAlign='right';
+  ctx.fillText('SKILL',W-pad,pad+bH+15);
 
   // 콤보
   fighters.forEach(f=>{
     if(f.combo>=2&&f.comboT>0){
       const cx=f.isP1?170:W-170;
       ctx.save();
-      ctx.font=`bold ${18+Math.min(f.combo*2,18)}px Orbitron`;
+      ctx.font=`bold ${Math.min(18+f.combo*2,30)}px Orbitron`;
       ctx.textAlign='center';
       ctx.fillStyle=f.combo>=5?'#ffd700':f.isP1?CHARS[p1Sel].color:CHARS[p2Sel].color;
       ctx.globalAlpha=Math.min(1,f.comboT*1.8);
-      ctx.fillText(`${f.combo} HIT!`, cx, H-70);
+      ctx.fillText(`${f.combo} HIT!`,cx,H-72);
       ctx.restore();
     }
   });
 
-  // ── 조작키 안내 (게임 화면 하단) ──
-  drawControls();
-}
-
-function drawControls(){
-  const y=H-4;
-  ctx.font='10px Rajdhani';
-  ctx.globalAlpha=0.45;
-
-  // P1 조작키 (좌측)
-  ctx.textAlign='left'; ctx.fillStyle='#7aa0ff';
-  ctx.fillText('1P: A/D이동  W점프  S가드  J공격  L스킬', 10, y);
-
-  // P2 조작키 (우측)
-  ctx.textAlign='right'; ctx.fillStyle='#ff7a9a';
-  ctx.fillText('2P: ←/→이동  ↑점프  ↓가드  U공격  O스킬', W-10, y);
-
+  // ── 게임 화면 조작키 안내 (하단) ──
+  ctx.globalAlpha=0.42;
+  // P1
+  ctx.font='10px Rajdhani';ctx.textAlign='left';ctx.fillStyle='#7aa0ff';
+  ctx.fillText('1P:  A/D 이동    W 점프    S 가드    J 공격    L 스킬',10,H-4);
+  // P2
+  ctx.textAlign='right';ctx.fillStyle='#ff7a9a';
+  ctx.fillText('2P:  ←/→ 이동    ↑ 점프    ↓ 가드    U 공격    O 스킬',W-10,H-4);
   ctx.globalAlpha=1;
 }
 
 function endGame(){
-  gameOver=true; stopGame();
+  gameOver=true;stopGame();
   const [p1,p2]=fighters;
-  let winner, rTxt;
+  let winner,rTxt;
   if(p1.dead&&!p2.dead){winner=`2P — ${CHARS[p2Sel].name}`;rTxt='K.O.';}
   else if(p2.dead&&!p1.dead){winner=`1P — ${CHARS[p1Sel].name}`;rTxt='K.O.';}
   else if(p1.hp>p2.hp){winner=`1P — ${CHARS[p1Sel].name}`;rTxt='TIME UP';}
@@ -760,7 +682,7 @@ function endGame(){
     document.getElementById('resultWinner').textContent=winner+' WINS!';
     document.getElementById('resultText').style.color=
       winner.startsWith('1P')?CHARS[p1Sel].color:winner.startsWith('2P')?CHARS[p2Sel].color:'#ffd700';
-  }, 1200);
+  },1200);
 }
 </script>
 </body>
